@@ -1,0 +1,17 @@
+<#if notificationContentList??>
+	<#list notificationContentList?sort_by('date') as notification>
+	<tr class="notification-content" id="content-${(notification.demand.id)!}">
+		<td colspan="3">
+			<div class="media mb-2">
+				<img src="images/local/skin/logo-admin.png" class="mr-3 img-fluid" aria-hidden="true" title="Mairie de Paris" alt="...">
+				<div class="media-body pt-sm-4">
+					<h5>
+						${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - <strong>${(notification.myDashboardNotification.subject)!}</strong>
+					</h5>
+					<p class="py-2 px-4">${(notification.myDashboardNotification.message)!}</p>
+				</div>
+			</div>
+		</td>
+	</tr>
+	</#list>
+</#if>
