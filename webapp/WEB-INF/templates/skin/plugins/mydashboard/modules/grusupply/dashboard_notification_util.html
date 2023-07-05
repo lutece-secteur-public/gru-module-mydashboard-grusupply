@@ -1,0 +1,71 @@
+<#-- Get the demand_type from a given id demand type -->
+<#function getDemandType demand_types_list id_demand_type>
+    <#if demand_types_list?? && demand_types_list?has_content>
+        <#list demand_types_list as demand_type>
+            <#if demand_type.id?string = id_demand_type>
+                <#return demand_type>
+            </#if>
+        </#list>
+    </#if>
+</#function>
+
+<#macro tabDemands listDemand>
+<table class="table table-hover table-bordered">
+  <caption class="sr-only">Liste des demandes</caption>
+  <thead class="sr-only sr-only-focusable">
+    <tr>
+      <th scope="col" class="text-center"><span>Date</span></th>
+      <th scope="col" class="text-center"><span>Type</span></th>
+      <th scope="col" class="text-center">
+        <span>Statut</span>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  <#list listDemand as demand>
+      <#if getDemandType( demand_types_list, demand.typeId )?has_content>
+        <#assign demand_type = getDemandType( demand_types_list, demand.typeId)>
+      </#if>
+      <#if demand_type??>
+        <tr id="demand-head-${(demand.id)!}" data-id="${(demand.id)!}"  data-type-id="${(demand.typeId)!}" class="demand-head">
+          <td data-label="Date :">
+	          	<#if demand.read?? && demand.read>
+	          		<i class="fa fa-envelope-open-o main-color" aria-hidden="true"></i>	          	
+	          	<#else>
+	          		<i class="fa fa-envelope-o main-color" aria-hidden="true" id="on-demand-${(demand.id)!}" title=""></i>	          		
+	          	</#if>
+	          		&nbsp;${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}
+          </td>
+          <td data-label="Type :">
+            <strong>${(demand_type.label)!}</strong>
+          </td>
+          <td class="text-sm-left text-md-center" data-label="Statut : ">
+            ${(demand.statusMyDashboard)!}
+          </td>
+        </tr>
+      </#if>
+  </#list>
+  </tbody>
+</table>
+</#macro>
+
+<script>
+$(document).ready( function( ) {
+    $(".demand-head").click( function(e) {
+        var idDemand = $(this).data("id")
+        var idTypeDemand = $(this).data("type-id");
+		$(this).find('i').removeClass('fa-envelope-o');
+		$(this).find('i').addClass('fa-envelope-open-o');
+        $.ajax({
+        	url: 'jsp/site/Portal.jsp?page=myDashboardGruSupplyApp&view=getNotificationContent',
+            type: "POST",
+			data: {demandId: idDemand, demandTypeId: idTypeDemand},
+	        success: function (data) {
+	            $('.notification-content').remove();
+	    		$("#content-" + idDemand ).remove();
+	        	$('#demand-head-'+idDemand).after(data.content);
+	        },
+		});
+    });
+});
+</script>
