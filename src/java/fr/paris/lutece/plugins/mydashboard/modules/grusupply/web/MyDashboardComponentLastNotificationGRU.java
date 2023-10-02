@@ -57,6 +57,7 @@ import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.portal.service.security.SecurityService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
+import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.util.html.HtmlTemplate;
 
 /**
@@ -75,7 +76,7 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
     private static final String    TEMPLATE_LAST_NOTIFICATION_LIST = "skin/plugins/mydashboard/modules/grusupply/dashboard_last_demand.html";
     private static final String    DASHBOARD_COMPONENT_ID          = "mydashboard-grusupply.componentLastNotification";
     private static final String    MESSAGE_COMPONENT_DESCRIPTION   = "module.mydashboard.grusupply.myDashboardComponentLastNotification.description";
-
+    private static final String    PROPERTY_LIMIT_RESULT           = AppPropertiesService.getProperty( "mydashboard-grusupply.limit.result.lastnotification", "5" );
     // MARKS
     private static final String    MARK_DEMAND_TYPE_LIST           = "demand_types_list";
     private static final String    MARK_LIST_DEMAND                = "list_demands";
@@ -93,14 +94,14 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
         {
             Map<String, Object> model = new HashMap<>( );
             
-            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), "1", EnumNotificationType.MYDASHBOARD.toString( ) );
+            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), "1", PROPERTY_LIMIT_RESULT, EnumNotificationType.MYDASHBOARD.toString( ) );
             List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
             
             if ( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
                 for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
                 {
-                    DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getDemandId( ) , false );
+                    DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getId( ) , false );
                     demandDashboard.setDemand( demand.getDemand( ) );
                     demandDashboard.setStatus( demand.getStatus( ) );
                     listDemandDashboards.add( demandDashboard );

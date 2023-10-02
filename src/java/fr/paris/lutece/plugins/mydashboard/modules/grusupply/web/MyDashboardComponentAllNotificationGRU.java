@@ -114,7 +114,8 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
 
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
-            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), strCurrentPageIndex, EnumNotificationType.MYDASHBOARD.toString( ) );
+            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ) );
+
 
             // PAGINATOR
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
@@ -129,7 +130,7 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
                 {
                     for( DemandDisplay demand : paginator.getPageItems( ) )
                     {
-                        DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getDemandId( ) , false );
+                        DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getId( ) , false );
                         demandDashboard.setStatus( demand.getStatus( ) );
                         demandDashboard.setDemand( demand.getDemand( ) );
                         listDemandDashboards.add( demandDashboard );

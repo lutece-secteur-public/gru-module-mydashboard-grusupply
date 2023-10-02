@@ -14,15 +14,14 @@
 	<bean id="mydashboard-grusupply.myDashboardLastComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentLastNotificationGRU" />
 	<bean id="mydashboard-grusupply.myDashboardAllComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentAllNotificationGRU" />
 	
-	 <!-- NOTIFICATIONSTORE BEAN -->
-	 
-<!-- 	<bean id="mydashboard-grusupply.notificationstore.httpTransport" class="fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.HttpAccessTransport">
+	 <!-- NOTIFICATIONSTORE BEAN -->	 
+ 	<bean id="mydashboard-grusupply.notificationstore.httpTransport" class="fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.HttpAccessTransport">
         <property name="ApiEndPointUrl">
-            <value>http://localhost.paris.mdp:8094/notifications/rest/grusupply/demand/</value>
+            <value>${mydashboard-grusupply.notificationstore.endpoint}</value>
         </property>
     </bean>       
     <bean id="mydashboard-grusupply.notificationstore.restservice" class="fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.NotificationStoreTransportRest">
         <constructor-arg ref="mydashboard-grusupply.notificationstore.httpTransport"/>
-    </bean> -->
+    </bean>
 
 </beans>
