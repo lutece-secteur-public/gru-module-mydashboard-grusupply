@@ -33,22 +33,18 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import javax.inject.Inject;
+import javax.inject.Named;
 
-import fr.paris.lutece.plugins.grustoragedb.business.DemandType;
-import fr.paris.lutece.plugins.grusupply.web.rs.DemandResult;
-import fr.paris.lutece.plugins.grusupply.web.rs.NotificationResult;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
+import fr.paris.lutece.plugins.grubusiness.service.notification.NotificationException;
+import fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.NotificationStoreTransportRest;
 import fr.paris.lutece.portal.service.util.AppLogService;
-import fr.paris.lutece.portal.service.util.AppPropertiesService;
-import fr.paris.lutece.util.httpaccess.HttpAccess;
-import fr.paris.lutece.util.httpaccess.HttpAccessException;
+import java.util.Collections;
 
 /**
  * 
@@ -60,19 +56,10 @@ public class NotificationGruService
     // BEAN
     public static final String  BEAN_NAME                           = "mydashboard-grusupply.notificationGruService";
 
-    // PROPERTIES
-    private static final String PROPERTY_HOST                       = AppPropertiesService.getProperty( "mydashboard-grusupply.api.rest.demand_notification.host" );
-    private static final String PROPERTY_DEMAND_LIST_ENDPOINT       = AppPropertiesService.getProperty( "mydashboard-grusupply.api.rest.demand_list.endpoint" );
-    private static final String PROPERTY_NOTIFICATION_LIST_ENDPOINT = AppPropertiesService.getProperty( "mydashboard-grusupply.api.rest.notification_list.endpoint" );
-    private static final String PROPERTY_DEMANDTYPE_LIST_ENDPOINT   = AppPropertiesService.getProperty( "mydashboard-grusupply.api.rest.demand_type_list.endpoint" );
-
-    // PARAMETERS
-    private static final String PARAMETER_CUSTOMER_ID               = "customerId";
-    private static final String PARAMETER_INDEX                     = "index";
-    private static final String PARAMETER_READED                    = "readed";
-    private static final String PARAMETER_ID_DEMAND                 = "idDemand";
-    private static final String PARAMETER_ID_DEMAND_TYPE            = "idDemandType";
-
+    @Inject
+    @Named("mydashboard-grusupply.notificationstore.restservice")
+    private NotificationStoreTransportRest _notificationStoreProvider;
+    
     /**
      * Constructor
      */
@@ -86,29 +73,22 @@ public class NotificationGruService
      * 
      * @param strCustomerId
      * @param strIndex
+     * @param strLimitResult
+     * @param strNotificationType
      * @return list of demand
      */
-    public DemandResult getListDemand( String strCustomerId, String strIndex )
+    public DemandResult getListDemand( String strCustomerId, String strIndex, String strLimitResult, String strNotificationType )
     {
-        DemandResult demandResult = new DemandResult( );
-
-        Map<String, String> headers = new HashMap<>( );
-        headers.put( PARAMETER_CUSTOMER_ID, strCustomerId );
-        headers.put( PARAMETER_INDEX, strIndex );
-
         try
         {
-            HttpAccess httpAccess = new HttpAccess( );
-            String result = httpAccess.doGet( PROPERTY_HOST + PROPERTY_DEMAND_LIST_ENDPOINT, null, null, headers );
-
-            demandResult = MydashboardGrusupplyUtil.getObjectMapper( ).readValue( result, DemandResult.class );
-
-        } catch ( HttpAccessException | JsonProcessingException e )
-        {
-            AppLogService.error( "Error while reading JSON of list demand for customer id {} ", strCustomerId, e );
+            return _notificationStoreProvider.getListDemand( strCustomerId, null, strIndex, strLimitResult, strNotificationType );
         }
-
-        return demandResult;
+        catch ( NotificationException e )
+        {
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des demandes de l'utilisateur {}",strCustomerId, e.getMessage( ) );
+        }
+        
+        return null;
     }
 
 
@@ -119,28 +99,16 @@ public class NotificationGruService
      * @param strIsRead
      * @return list of notification
      */
-    public NotificationResult getListNotification( String strIdDemand, String strIdDemandType, String strIsRead )
-    {
-        NotificationResult notificationResult = new NotificationResult( );
-
-        Map<String, String> headers = new HashMap<>( );
-        headers.put( PARAMETER_ID_DEMAND, strIdDemand );
-        headers.put( PARAMETER_ID_DEMAND_TYPE, strIdDemandType );
-        headers.put( PARAMETER_READED, strIsRead );
-
+    public NotificationResult getListNotification( String strIdDemand, String strIdDemandType, String strCustomerId )
+    {        
         try
         {
-            HttpAccess httpAccess = new HttpAccess( );
-            String result = httpAccess.doGet( PROPERTY_HOST + PROPERTY_NOTIFICATION_LIST_ENDPOINT, null, null, headers );
-
-            notificationResult = MydashboardGrusupplyUtil.getObjectMapper( ).readValue( result, NotificationResult.class );
-
-        } catch ( HttpAccessException | JsonProcessingException e )
+            return _notificationStoreProvider.getListNotification( strCustomerId, strIdDemand, strIdDemandType );
+        } catch ( NotificationException e )
         {
-            AppLogService.error( "Error while reading JSON for notification id demand {} ", strIdDemand, e );
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des notifications de l'utilisateur {}", strCustomerId, e.getMessage( ) );
         }
-
-        return notificationResult;
+        return null;
     }
 
     /**
@@ -150,22 +118,13 @@ public class NotificationGruService
      */
     public List<DemandType> getListDemandType( )
     {
-        List<DemandType> listDemandType = new ArrayList<>( );
-        
         try
         {
-            HttpAccess httpAccess = new HttpAccess( );
-            String result = httpAccess.doGet( PROPERTY_HOST + PROPERTY_DEMANDTYPE_LIST_ENDPOINT );
-
-            listDemandType = MydashboardGrusupplyUtil.getObjectMapper( ).readValue( result, new TypeReference<List<DemandType>>( )
-            {
-            } );
-
-        } catch ( HttpAccessException | JsonProcessingException e )
+            return _notificationStoreProvider.getDemandTypes( );
+        } catch ( NotificationException e )
         {
-            AppLogService.error( "Error while reading JSON for demand type", e );
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
         }
-
-        return listDemandType;
+        return Collections.emptyList();
     }
 }
