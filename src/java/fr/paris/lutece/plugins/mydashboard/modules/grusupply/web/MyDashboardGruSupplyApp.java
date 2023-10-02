@@ -41,7 +41,9 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 
-import fr.paris.lutece.plugins.grusupply.web.rs.NotificationResult;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardHome;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
 import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
@@ -93,13 +95,19 @@ public class MyDashboardGruSupplyApp extends MVCApplication
 
         if ( StringUtils.isNotEmpty( strIdDemand ) && user != null )
         {
-            NotificationResult result = _notificationService.getListNotification( strIdDemand, strIdDemandType, BooleanUtils.TRUE );
+            NotificationResult result = _notificationService.getListNotification( strIdDemand, strIdDemandType, user.getName( ) );
 
             Map<String, Object> model = getModel( );
 
             if ( result != null && result.getNotifications( ) != null )
             {
                 model.put( MARK_NOTIFICATION_LIST, result.getNotifications( ) );
+                
+                //Demand is read
+                if( DemandDashboardHome.findByPrimaryKey( Integer.parseInt( strIdDemand ) ) == null )
+                {
+                    DemandDashboardHome.create( new DemandDashboard( Integer.parseInt( strIdDemand ), true ) );
+                }
             }
 
             HtmlTemplate htmlTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_CONTENT, request.getLocale( ), model );

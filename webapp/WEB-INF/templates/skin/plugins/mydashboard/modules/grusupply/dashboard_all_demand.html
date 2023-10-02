@@ -5,9 +5,9 @@
 		<div class="col-xs-12 col-sm-12 col-md-9 pt-3">
 			<h2 class="main-color mb-3">Mes demandes</h2>
 			<p class="py-3 font-m-light">Retrouvez le suivi centralis&eacute; des demandes que vous avez effectu&eacute;es<br>aupr&egrave;s des diff&eacute;rents services num&eacute;riques de la ville.</p>
-			<#if notification_list?? && notification_list?has_content>
+			<#if list_demands?? && list_demands?has_content>
 				<div class="form">
-					<@tabDemands listDemand=notification_list />
+					<@tabDemands listDemandDashboard=list_demands />
 				</div>
 				<@paginationSite paginator=paginator />
 			<#else>

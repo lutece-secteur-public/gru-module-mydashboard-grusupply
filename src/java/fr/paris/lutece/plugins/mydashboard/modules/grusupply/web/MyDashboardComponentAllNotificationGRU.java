@@ -33,7 +33,9 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -45,8 +47,11 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
-import fr.paris.lutece.plugins.grusupply.web.rs.DemandResult;
+import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardHome;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
 import fr.paris.lutece.portal.service.i18n.I18nService;
@@ -82,7 +87,7 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
     private static final String    PROPERTY_URL_MES_DEMARCHES         = "mydashboard-grusupply.url.mesdemarches";
 
     // MARKS
-    private static final String    MARK_DEMAND_LIST                   = "notification_list";
+    private static final String    MARK_LIST_DEMAND                   = "list_demands";
     private static final String    MARK_NB_ITEMS_PER_PAGE             = "nb_items_per_page";
     private static final String    MARK_PAGINATOR                     = "paginator";
     private static final String    MARK_DEMAND_TYPE_LIST              = "demand_types_list";
@@ -109,19 +114,33 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
 
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
-            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), strCurrentPageIndex );
+            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), strCurrentPageIndex, EnumNotificationType.MYDASHBOARD.toString( ) );
 
             // PAGINATOR
-            if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getDemands( ) ) )
+            if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
-                LocalizedDelegatePaginator<Demand> paginator = new LocalizedDelegatePaginator<>( demandResult.getDemands( ), nDefaultItemsPerPage,
+                LocalizedDelegatePaginator<DemandDisplay> paginator = new LocalizedDelegatePaginator<>( demandResult.getListDemandDisplay( ), nDefaultItemsPerPage,
                         AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ), AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex, demandResult.getNumberResult( ),
                         request.getLocale( ) );
     
+                List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
+                
+                if ( CollectionUtils.isNotEmpty( paginator.getPageItems( ) ) )
+                {
+                    for( DemandDisplay demand : paginator.getPageItems( ) )
+                    {
+                        DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getDemandId( ) , false );
+                        demandDashboard.setStatus( demand.getStatus( ) );
+                        demandDashboard.setDemand( demand.getDemand( ) );
+                        listDemandDashboards.add( demandDashboard );
+                    }                
+                    listDemandDashboards = DemandDashboardHome.selectByDemandIds( listDemandDashboards );
+                }
+                
                 model.put( MARK_DEMAND_TYPE_LIST, _notificationService.getListDemandType( ) );
                 model.put( MARK_NB_ITEMS_PER_PAGE, nDefaultItemsPerPage );
                 model.put( MARK_PAGINATOR, paginator );
-                model.put( MARK_DEMAND_LIST, paginator.getPageItems( ) );
+                model.put( MARK_LIST_DEMAND, listDemandDashboards );
             }
 
             HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_LAST_NOTIFICATION_LIST, request.getLocale( ), model );

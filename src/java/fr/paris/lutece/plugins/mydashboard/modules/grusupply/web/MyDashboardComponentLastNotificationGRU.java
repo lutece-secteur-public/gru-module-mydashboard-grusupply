@@ -33,7 +33,9 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -41,8 +43,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardHome;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
 import fr.paris.lutece.portal.service.i18n.I18nService;
@@ -70,7 +78,7 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
 
     // MARKS
     private static final String    MARK_DEMAND_TYPE_LIST           = "demand_types_list";
-    private static final String    MARK_RESULT                     = "result";
+    private static final String    MARK_LIST_DEMAND                = "list_demands";
 
     @Inject
     @Named( NotificationGruService.BEAN_NAME )
@@ -84,9 +92,24 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
         if ( user != null )
         {
             Map<String, Object> model = new HashMap<>( );
+            
+            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), "1", EnumNotificationType.MYDASHBOARD.toString( ) );
+            List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
+            
+            if ( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
+            {
+                for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
+                {
+                    DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getDemandId( ) , false );
+                    demandDashboard.setDemand( demand.getDemand( ) );
+                    demandDashboard.setStatus( demand.getStatus( ) );
+                    listDemandDashboards.add( demandDashboard );
+                }                
+                listDemandDashboards = DemandDashboardHome.selectByDemandIds( listDemandDashboards );
+            }
 
             model.put( MARK_DEMAND_TYPE_LIST, _notificationService.getListDemandType( ) );
-            model.put( MARK_RESULT, _notificationService.getListDemand( user.getName( ), "1" ) );
+            model.put( MARK_LIST_DEMAND, listDemandDashboards );
 
             HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_LAST_NOTIFICATION_LIST, request.getLocale( ), model );
 

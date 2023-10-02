@@ -9,7 +9,7 @@
     </#if>
 </#function>
 
-<#macro tabDemands listDemand>
+<#macro tabDemands listDemandDashboard>
 <table class="table table-hover table-bordered">
   <caption class="sr-only">Liste des demandes</caption>
   <thead class="sr-only sr-only-focusable">
@@ -22,17 +22,18 @@
     </tr>
   </thead>
   <tbody>
-  <#list listDemand as demand>
+  <#list listDemandDashboard as demandDashboard>
+      <#assign demand = demandDashboard.demand>
       <#if getDemandType( demand_types_list, demand.typeId )?has_content>
         <#assign demand_type = getDemandType( demand_types_list, demand.typeId)>
       </#if>
       <#if demand_type??>
-        <tr id="demand-head-${(demand.id)!}" data-id="${(demand.id)!}"  data-type-id="${(demand.typeId)!}" class="demand-head">
+        <tr id="demand-head-${(demand.demandId)!}" data-id="${(demand.demandId)!}"  data-type-id="${(demand.typeId)!}" class="demand-head">
           <td data-label="Date :">
-	          	<#if demand.read?? && demand.read>
+	          	<#if demandDashboard.read?? && demandDashboard.read>
 	          		<i class="fa fa-envelope-open-o main-color" aria-hidden="true"></i>	          	
 	          	<#else>
-	          		<i class="fa fa-envelope-o main-color" aria-hidden="true" id="on-demand-${(demand.id)!}" title=""></i>	          		
+	          		<i class="fa fa-envelope-o main-color" aria-hidden="true" id="on-demand-${(demand.demandId)!}" title=""></i>	          		
 	          	</#if>
 	          		&nbsp;${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}
           </td>
@@ -40,7 +41,7 @@
             <strong>${(demand_type.label)!}</strong>
           </td>
           <td class="text-sm-left text-md-center" data-label="Statut : ">
-            ${(demand.statusMyDashboard)!}
+            ${(demandDashboard.status)!}
           </td>
         </tr>
       </#if>
