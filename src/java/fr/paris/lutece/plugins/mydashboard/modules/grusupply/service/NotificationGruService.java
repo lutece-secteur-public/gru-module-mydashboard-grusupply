@@ -33,20 +33,18 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandType;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
+import fr.paris.lutece.plugins.grubusiness.service.notification.NotificationException;
 import fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.NotificationStoreTransportRest;
 import fr.paris.lutece.portal.service.util.AppLogService;
+import java.util.Collections;
 
 /**
  * 
@@ -75,12 +73,22 @@ public class NotificationGruService
      * 
      * @param strCustomerId
      * @param strIndex
+     * @param strLimitResult
      * @param strNotificationType
      * @return list of demand
      */
-    public DemandResult getListDemand( String strCustomerId, String strIndex, String strNotificationType )
+    public DemandResult getListDemand( String strCustomerId, String strIndex, String strLimitResult, String strNotificationType )
     {
-        return _notificationStoreProvider.getListDemand( strCustomerId, null, strIndex, strNotificationType );
+        try
+        {
+            return _notificationStoreProvider.getListDemand( strCustomerId, null, strIndex, strLimitResult, strNotificationType );
+        }
+        catch ( NotificationException e )
+        {
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des demandes de l'utilisateur {}",strCustomerId, e.getMessage( ) );
+        }
+        
+        return null;
     }
 
 
@@ -93,7 +101,14 @@ public class NotificationGruService
      */
     public NotificationResult getListNotification( String strIdDemand, String strIdDemandType, String strCustomerId )
     {        
-        return _notificationStoreProvider.getListNotification( strCustomerId, strIdDemand, strIdDemandType );        
+        try
+        {
+            return _notificationStoreProvider.getListNotification( strCustomerId, strIdDemand, strIdDemandType );
+        } catch ( NotificationException e )
+        {
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des notifications de l'utilisateur {}", strCustomerId, e.getMessage( ) );
+        }
+        return null;
     }
 
     /**
@@ -103,17 +118,13 @@ public class NotificationGruService
      */
     public List<DemandType> getListDemandType( )
     {
-        String jsonDemandType = _notificationStoreProvider.getDemandTypes( );
-        
-        List<DemandType> listDemandType = new ArrayList< >( ) ;
         try
         {
-            listDemandType = MydashboardGrusupplyUtil.getObjectMapper( ).readValue( jsonDemandType, new TypeReference<List<DemandType>>( ){} );
-        }
-        catch( final Exception e )
+            return _notificationStoreProvider.getDemandTypes( );
+        } catch ( NotificationException e )
         {
-            AppLogService.error( "LibraryNotificationstore - Error HttpAccessTransport :" + e.getMessage( ), e );
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
         }
-        return listDemandType;
+        return Collections.emptyList();
     }
 }
