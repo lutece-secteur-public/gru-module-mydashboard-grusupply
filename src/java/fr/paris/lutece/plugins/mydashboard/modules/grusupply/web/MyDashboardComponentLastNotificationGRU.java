@@ -49,6 +49,7 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardHome;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
@@ -101,9 +102,15 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
             {
                 for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
                 {
-                    DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getId( ) , false );
+                    NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), user.getName( ) );
+                    
+                    DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                     demandDashboard.setDemand( demand.getDemand( ) );
                     demandDashboard.setStatus( demand.getStatus( ) );
+                    if ( notificationList != null && notificationList.getNotifications( ) != null )
+                    {
+                        demandDashboard.setListNotification( notificationList.getNotifications( ) );
+                    }
                     listDemandDashboards.add( demandDashboard );
                 }                
                 listDemandDashboards = DemandDashboardHome.selectByDemandIds( listDemandDashboards );

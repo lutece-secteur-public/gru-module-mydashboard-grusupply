@@ -33,7 +33,10 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.business;
 
+import java.util.List;
+
 import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
+import fr.paris.lutece.plugins.grubusiness.business.notification.Notification;
 
 /**
  * This is the business class for the object DemandDashboard
@@ -45,6 +48,7 @@ public class DemandDashboard
     private boolean _bRead;
     private Demand _demand;
     private String _strStatus;
+    private List<Notification> _listNotification;
 
     /**
      * Constructor
@@ -141,7 +145,21 @@ public class DemandDashboard
     {
         this._strStatus = strStatus;
     }
-    
-    
+
+    /**
+     * @return the _listNotification
+     */
+    public List<Notification> getListNotification( )
+    {
+        return _listNotification;
+    }
+
+    /**
+     * @param listNotification the _listNotification to set
+     */
+    public void setListNotification( List<Notification> listNotification )
+    {
+        this._listNotification = listNotification;
+    }
 
 }
