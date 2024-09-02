@@ -2,71 +2,104 @@
 <#function getDemandType demand_types_list id_demand_type>
     <#if demand_types_list?? && demand_types_list?has_content>
         <#list demand_types_list as demand_type>
-            <#if demand_type.id?string = id_demand_type>
+            <#if demand_type.idDemandType?string = id_demand_type>
                 <#return demand_type>
             </#if>
         </#list>
     </#if>
 </#function>
-
+<#function getBgColor label >
+	<#assign color = 'F2F6FF'/>
+	<#if label?contains("TERM") || label?contains("ACQUI") >
+		<#assign color = 'F2F6FF'/>
+	<#elseif label?contains("COMPL") || label?contains("RÉGL") || label?contains("REGL") >
+		<#assign color = 'FFFAE6'/>
+	<#elseif label?contains("COUR")>
+		<#assign color = 'F2F6FF'/>
+	<#elseif label?contains("ANNUL")>
+		<#assign color = 'F2F6FF'/>
+	</#if>
+	<#return 'background-color:#'+ color +' !important;'/>
+</#function>
+<#function getColorStatus label >
+	<#assign color = '071F32'/>
+	<#if label?contains("TERM") || label?contains("ACQUI") >
+		<#assign color = '3AE932'/>
+	<#elseif label?contains("COMPL") || label?contains("RÉGL") || label?contains("REGL") >
+		<#assign color = 'E22C3F'/>
+	<#elseif label?contains("COUR")>
+		<#assign color = 'E4AB73'/>
+	<#elseif label?contains("ANNUL")>
+		<#assign color = '828E98'/>
+	</#if>
+	<#return 'color:#'+ color +' !important;'/>
+</#function>
+  
 <#macro tabDemands listDemandDashboard>
-<table class="table table-hover table-bordered">
-  <caption class="sr-only">Liste des demandes</caption>
-  <thead class="sr-only sr-only-focusable">
-    <tr>
-      <th scope="col" class="text-center"><span>Date</span></th>
-      <th scope="col" class="text-center"><span>Type</span></th>
-      <th scope="col" class="text-center">
-        <span>Statut</span>
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-  <#list listDemandDashboard as demandDashboard>
-      <#assign demand = demandDashboard.demand>
-      <#if getDemandType( demand_types_list, demand.typeId )?has_content>
-        <#assign demand_type = getDemandType( demand_types_list, demand.typeId)>
-      </#if>
-      <#if demand_type??>
-        <tr id="demand-head-${(demand.demandId)!}" data-id="${(demand.demandId)!}"  data-type-id="${(demand.typeId)!}" class="demand-head">
-          <td data-label="Date�:">
-	          	<#if demandDashboard.read?? && demandDashboard.read>
-	          		<i class="fa fa-envelope-open-o main-color" aria-hidden="true"></i>	          	
-	          	<#else>
-	          		<i class="fa fa-envelope-o main-color" aria-hidden="true" id="on-demand-${(demand.demandId)!}" title=""></i>	          		
-	          	</#if>
-	          		&nbsp;${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}
-          </td>
-          <td data-label="Type :">
+<@cTable themed=false caption='Liste des demandes'>
+    <@cThead>
+      <@cTr>
+      <@cTh>Demandes</@cTh>
+      <@cTh class='status'>#i18n{crm.crm.columnStatus}</@cTh>
+      <@cTh>Date de mise à jour</@cTh>
+      <@cTh></@cTh>
+    </@cTr>
+  </@cThead>
+  <@cTbody>
+  <#list  listDemandDashboard as demandDashboard>
+ 	 <#assign demand = demandDashboard.demand>
+    	<#if getDemandType( demand_types_list, demand.typeId )?has_content><#assign demand_type = getDemandType( demand_types_list, demand.typeId)></#if>
+        <#if demand_type??>
+        <@cTr id="demand-head-${(demand.UID)!}" class="demand-head bg-content" params='data-id="${(demand.UID)!}" data-type-id="${(demand.typeId)!}" style="${getBgColor(demandDashboard.status?upper_case)}"'>
+          <@cTd params='data-label="Type : "' nospan=true>
             <strong>${(demand_type.label)!}</strong>
-          </td>
-          <td class="text-sm-left text-md-center" data-label="Statut : ">
+	 		<#if demandDashboard.listNotification??>
+				<#list demandDashboard.listNotification?sort_by('date') as notification>
+					<p class="notif font-weight-normal mt-1">${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - ${(notification.myDashboardNotification.subject)!}
+				</#list>
+			<#else>
+				<p class="notif font-weight-normal mt-1">Aucune notification !</p>
+			</#if>
+          </@cTd>
+          <@cTd params='data-label="Statut : " style="${getColorStatus(demandDashboard.status?upper_case)}"' class='status' nospan=true>
             ${(demandDashboard.status)!}
-          </td>
-        </tr>
-      </#if>
+           </@cTd>
+          <@cTd class='pe-5' params='data-label="Date :"' nospan=true>
+            <@cSection type='div' class='d-flex flex-column justify-content-center'>
+              <strong>${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}</strong>
+              <small>initié le ${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}</small>
+            </@cSection>
+          </@cTd>
+          <@cTd class='pe-5' params='data-label="Date :"' nospan=true>
+            <#if demand_type.url?has_content><@cLink href='${demand_type.url!}' label='Accéder<br> au service' class='show-target fs-sm url-sn' target='_blank' showTarget=true /></#if>
+          </@cTd>
+	    </@cTr>
+		<#if demandDashboard.listNotification??>
+			<#list demandDashboard.listNotification?sort_by('date') as notification>
+			<@cTr class="sub msg-${notification.demand.UID!} notification-content" id="content-${(notification.demand.UID)!}" params='style="display:none"'>
+				 <@cTd colspan="4" params='style="border-inline: 1px solid gray;"'>
+					<@div class="d-flex align-items-start mb-2" params='style="gap:1.5rem"'>
+						<@div class="media-body text-left">
+							<h3 class="h5 fs-sm main-color">
+								${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - <strong>${(notification.myDashboardNotification.subject)!}</strong>
+							</h3>
+							<p class="py-2 px-4">${(notification.myDashboardNotification.message)!}</p>
+						</@div>
+					</@div>
+				</@cTd>
+			</@cTr>
+			</#list>
+		</#if>
+      	</#if>
   </#list>
-  </tbody>
-</table>
+  </@cTbody>
+</@cTable>
 </#macro>
-
 <script>
 $(document).ready( function( ) {
-    $(".demand-head").click( function(e) {
-        var idDemand = $(this).data("id")
-        var idTypeDemand = $(this).data("type-id");
-		$(this).find('i').removeClass('fa-envelope-o');
-		$(this).find('i').addClass('fa-envelope-open-o');
-        $.ajax({
-        	url: 'jsp/site/Portal.jsp?page=myDashboardGruSupplyApp&view=getNotificationContent',
-            type: "POST",
-			data: {demandId: idDemand, demandTypeId: idTypeDemand},
-	        success: function (data) {
-	            $('.notification-content').remove();
-	    		$("#content-" + idDemand ).remove();
-	        	$('#demand-head-'+idDemand).after(data.content);
-	        },
-		});
-    });
+  $(".demand-head").click( function(e) {
+    var idDemand = $(this).data("id")
+    $('.msg-' + idDemand).toggle();
+  });
 });
 </script>

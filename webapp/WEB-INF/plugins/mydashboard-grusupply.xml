@@ -23,13 +23,13 @@
     <admin-features>
     </admin-features>
 
-    <!-- XPages parameters -->
+    <!-- XPages parameters 
     <applications>
          <application>
-            <application-id>myDashboardGruSupplyApp</application-id>
-            <application-class>fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardGruSupplyApp</application-class>
+            <application-id></application-id>
+            <application-class></application-class>
         </application>
-    </applications>
+    </applications> -->
 
     <!-- Portlet parameters -->
     <portlets>
