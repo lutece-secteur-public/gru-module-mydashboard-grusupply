@@ -47,6 +47,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandStatus;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
@@ -66,10 +67,10 @@ import fr.paris.lutece.util.html.HtmlTemplate;
 
 /**
  * 
- * MyDashboardComponentAllNotification
+ * MyDashboardComponentCompletedNotificationGRU
  *
  */
-public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
+public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardComponent
 {
 
     /**
@@ -78,13 +79,13 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
     private static final long      serialVersionUID                   = 8297192924908575568L;
 
     // CONSTANTS
-    private static final String    TEMPLATE_LAST_NOTIFICATION_LIST    = "skin/plugins/mydashboard/modules/grusupply/dashboard_all_demand.html";
-    private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentAllNotification";
-    private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentAllNotification.description";
+    private static final String    TEMPLATE_NOTIFICATION_LIST         = "skin/plugins/mydashboard/modules/grusupply/dashboard_completed_demand.html";
+    private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentCompletedNotif";
+    private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentCompletedNotification.description";
     private static final String    CURRENT_PAGE_INDEX                 = "current_page_index";
 
     // PROPERTIES
-    private static final String    PROPERTY_NUMBER_OF_DEMAND_PER_PAGE = "grusupply.api.rest.limit.demand";
+    private static final String    PROPERTY_NUMBER_OF_DEMAND_PER_PAGE = "mydashboard-grusupply.limit.result.notification";
     private static final String    PROPERTY_URL_MES_DEMARCHES         = "mydashboard-grusupply.url.mesdemarches";
 
     // MARKS
@@ -115,8 +116,7 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
 
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
-            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ) );
-
+            DemandResult demandResult = _notificationService.getListDemandByStatus( user.getName( ), getListStatusCompleted( ) ,strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ) );
 
             // PAGINATOR
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
@@ -125,34 +125,11 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
                         AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ), AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex, demandResult.getNumberResult( ),
                         request.getLocale( ) );
     
-                List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
-                
-                if ( CollectionUtils.isNotEmpty( paginator.getPageItems( ) ) )
-                {
-                    for( DemandDisplay demand : paginator.getPageItems( ) )
-                    {
-                        NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), user.getName( ) );
-
-                        DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
-                        demandDashboard.setStatus( demand.getStatus( ) );
-                        demandDashboard.setDemand( demand.getDemand( ) );
-                        
-                        if ( notificationList != null && notificationList.getNotifications( ) != null )
-                        {
-                            demandDashboard.setListNotification( notificationList.getNotifications( ) );
-                        }
-                        listDemandDashboards.add( demandDashboard );
-                    }                
-                    listDemandDashboards = DemandDashboardHome.selectByDemandIds( listDemandDashboards );
-                }
-                
-                model.put( MARK_DEMAND_TYPE_LIST, _notificationService.getListDemandType( ) );
-                model.put( MARK_NB_ITEMS_PER_PAGE, nDefaultItemsPerPage );
-                model.put( MARK_PAGINATOR, paginator );
-                model.put( MARK_LIST_DEMAND, listDemandDashboards );
+                List<DemandDashboard> listDemandDashboards = getDemandDashboardList( user, paginator );                
+                setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards );
             }
 
-            HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_LAST_NOTIFICATION_LIST, request.getLocale( ), model );
+            HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_LIST, request.getLocale( ), model );
 
             return htmTemplate.getHtml( );
         }
@@ -171,5 +148,71 @@ public class MyDashboardComponentAllNotificationGRU extends MyDashboardComponent
     {
         return I18nService.getLocalizedString( MESSAGE_COMPONENT_DESCRIPTION, locale );
     }
+    
+    /**
+     * Get demand dashboard list
+     * @param user
+     * @param paginator
+     * @return list of demand dashboard
+     */
+    private List<DemandDashboard> getDemandDashboardList( LuteceUser user, LocalizedDelegatePaginator<DemandDisplay> paginator )
+    {
+        List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
+        
+        if ( CollectionUtils.isNotEmpty( paginator.getPageItems( ) ) )
+        {
+            for( DemandDisplay demand : paginator.getPageItems( ) )
+            {
+                NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), user.getName( ) );
 
+                DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
+                demandDashboard.setStatus( demand.getStatus( ) );
+                demandDashboard.setDemand( demand.getDemand( ) );                       
+                
+                if ( notificationList != null && notificationList.getNotifications( ) != null )
+                {
+                    demandDashboard.setListNotification( notificationList.getNotifications( ) );
+                }
+                listDemandDashboards.add( demandDashboard );
+            }                
+            listDemandDashboards = DemandDashboardHome.selectByDemandIds( listDemandDashboards );
+        }
+        return listDemandDashboards;
+    }
+
+    /**
+     * Set model
+     * @param model
+     * @param nDefaultItemsPerPage
+     * @param paginator
+     * @param listDemandDashboards
+     */
+    private void setModel( Map<String, Object> model, int nDefaultItemsPerPage, LocalizedDelegatePaginator<DemandDisplay> paginator, List<DemandDashboard> listDemandDashboards )
+    {
+        model.put( MARK_DEMAND_TYPE_LIST, _notificationService.getListDemandType( ) );
+        model.put( MARK_NB_ITEMS_PER_PAGE, nDefaultItemsPerPage );
+        model.put( MARK_PAGINATOR, paginator );
+        model.put( MARK_LIST_DEMAND, listDemandDashboards );
+    }
+    
+    /**
+     * Returns the list of status ids that are compelted.
+     * @return list of status ids that are completed.
+     */
+    private String getListStatusCompleted( )
+    {
+        List<DemandStatus> listDemandStatus = _notificationService.getDemandStatusList( );
+        StringBuilder listStatusInProgress = new StringBuilder( ); 
+        for( DemandStatus demandStatus : listDemandStatus )
+        {
+            if( demandStatus.getGenericStatus( ) != null && 
+                    demandStatus.getGenericStatus( ).isFinalStatus( ) )
+            {
+                listStatusInProgress.append( demandStatus.getId( ) + ",");
+            }
+        }
+        
+        return listStatusInProgress.toString( );
+    }
+    
 }

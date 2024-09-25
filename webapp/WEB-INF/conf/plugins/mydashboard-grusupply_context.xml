@@ -12,7 +12,8 @@
 	
 	<!-- Dashboard -->
 	<bean id="mydashboard-grusupply.myDashboardLastComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentLastNotificationGRU" />
-	<bean id="mydashboard-grusupply.myDashboardAllComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentAllNotificationGRU" />
+	<bean id="mydashboard-grusupply.myDashboardCompletedComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentCompletedNotificationGRU" />
+	<bean id="mydashboard-grusupply.myDashboardInProgressComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentInProgressNotificationGRU" />
 	
 	 <!-- NOTIFICATIONSTORE BEAN -->	 
  	<bean id="mydashboard-grusupply.notificationstore.httpTransport" class="fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.HttpAccessTransport">

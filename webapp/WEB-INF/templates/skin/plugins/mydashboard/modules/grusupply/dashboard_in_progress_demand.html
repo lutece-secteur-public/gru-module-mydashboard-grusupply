@@ -1,0 +1,24 @@
+<#include "/commons_site.html"/>
+<#include "dashboard_notification_util.html"/>
+<section class="container px-sm-5 py-3">
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-12 pt-3">
+		<@cTitle level=3 class='d-flex align-items-center py-3'>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+				<path fill="none" stroke="#354BCF" stroke-width="2" d="M6,16 L16,16 L6,16 L6,16 Z M6,12 L18,12 L6,12 L6,12 Z M6,8 L11,8 L6,8 L6,8 Z M14,1 L14,8 L21,8 M3,23 L3,1 L15,1 L21,7 L21,23 L3,23 Z"/>
+			</svg>
+			<@cText type='span' class='ml-3'>Mes demandes en cours</@cText>
+		</@cTitle>
+			<#if list_demands?? && list_demands?has_content>
+				<div class="form">
+					<@tabDemands listDemandDashboard=list_demands />
+				</div>
+				<@cPagination paginator=paginator fragment='demands' />
+			<#else>
+				<div class="alert alert-secondary" style="min-height: auto" role="alert">
+					<p class="text-dark font-weight-bold p-3 ml-3 mb-0">Vous n'avez fait aucune demande.</p>
+				</div>	
+			</#if>
+		</div>
+	</div>
+</section>
