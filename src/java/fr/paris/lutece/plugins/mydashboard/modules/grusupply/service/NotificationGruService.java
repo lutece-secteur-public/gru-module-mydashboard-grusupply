@@ -38,6 +38,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandStatus;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
@@ -91,6 +92,30 @@ public class NotificationGruService
         return null;
     }
 
+    /**
+     * Gets list of demand by list of status
+     * 
+     * @param strCustomerId
+     * @param strListStatus
+     * @param strIndex
+     * @param strLimitResult
+     * @param strNotificationType
+     * @return list of demand by list of status
+     */
+    public DemandResult getListDemandByStatus( String strCustomerId, String strListStatus, String strIndex, String strLimitResult, String strNotificationType )
+    {
+        try
+        {
+            return _notificationStoreProvider.getListOfDemandByStatus( strCustomerId, strListStatus, null, strIndex, strLimitResult, strNotificationType );
+        }
+        catch ( NotificationException e )
+        {
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des demandes par statut de l'utilisateur {}",strCustomerId, e.getMessage( ) );
+        }
+        
+        return null;
+    }
+    
 
     /**
      * Gets list of notification
@@ -124,6 +149,22 @@ public class NotificationGruService
         } catch ( NotificationException e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
+        }
+        return Collections.emptyList();
+    }
+    
+    /**
+     * Get list of demand status
+     * @return list of demand status
+     */
+    public List<DemandStatus> getDemandStatusList ( )
+    {
+        try
+        {
+            return _notificationStoreProvider.getStatusList( );
+        } catch ( NotificationException e )
+        {
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des status", e.getMessage( ) );  
         }
         return Collections.emptyList();
     }

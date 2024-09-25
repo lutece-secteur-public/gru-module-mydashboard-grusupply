@@ -1,26 +1,39 @@
 <#include "/commons_site.html"/>
 <#include "dashboard_notification_util.html"/>
-<section class="container px-sm-5 py-3">
-	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-9 pt-3">
-			<h2 class="main-color mb-3">Mes demandes</h2>
-			<p class="py-3 font-m-light">Retrouvez le suivi centralis&eacute; des demandes que vous avez effectu&eacute;es<br>aupr&egrave;s des diff&eacute;rents services num&eacute;riques de la ville.</p>
+<@cRow>
+	<@cCol cols='12 col-md-9 mt-5 mt-md-3'>
+		<@cTitle level=2>Bienvenue dans votre espace<br> Mon Paris !</@cTitle>
+		<@cText class="font-weight-bold mt-4">Depuis cet espace, vous pouvez suivre toutes vos démarches en cours, mettre à jour vos coordonnées et accéder à tous les services numériques de la Ville de Paris.</@cText>
+		<!-- Message pub -->
+		<@cSection type='aside' class='pt-l' params='role="complementary" aria-label="Information Mon Paris"'>
+			<@cContainer id='message-pub-rhsso'>${htmlpage_4!}</@cContainer>
+		</@cSection>
+	</@cCol>
+	<@cCol cols='12 col-md-3'>
+		<@cSection type='aside' params='role="complementary" aria-label="Information Paris"'>
+			<@cContainer id='pub-mydashboard'></@cContainer>
+		</@cSection>
+	</@cCol>
+</@cRow>
+<@cRow>
+	<@cCol>
+		<@cTitle level=3 class='d-flex align-items-center py-3'>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+				<path fill="none" stroke="#354BCF" stroke-width="2" d="M6,16 L16,16 L6,16 L6,16 Z M6,12 L18,12 L6,12 L6,12 Z M6,8 L11,8 L6,8 L6,8 Z M14,1 L14,8 L21,8 M3,23 L3,1 L15,1 L21,7 L21,23 L3,23 Z"/>
+			</svg>
+			<@cText type='span' class='ml-3'>Mes dernières démarches</@cText>
+		</@cTitle>
 			<#if list_demands?? && list_demands?has_content>
-				<div class="form">
-					<@tabDemands listDemandDashboard=list_demands />
-				</div>
-				<div class="row">
-					<div class="col-xs-12 col-sm-6 col-lg-4 text-center px-3">
-						<a href="jsp/site/Portal.jsp?page=mydashboard&panel=mes_demandes" class="btn btn-primary btn-block">
+				<@tabDemands listDemandDashboard=list_demands />
+				<@cRow>
+					<@cCol>
+						<@cLink href="jsp/site/Portal.jsp?page=mydashboard&cat=all&panel=mes_demandes" label=''>
 							Toutes mes demandes
-						</a>
-					</div>
-				</div>
+						</@cLink>
+					</@cCol>
+				</@cRow>
 			<#else>
-				<div class="alert alert-secondary" style="min-height: auto" role="alert">
-					<p class="text-dark font-weight-bold p-3 ml-3 mb-0">Vous n'avez fait aucune demande.</p>
-				</div>	
+				<@cAlert title='Vous n\'avez fait aucune demande' />
 			</#if>
-		</div>
-	</div>
-</section>
+	</@cCol>
+</@cRow>
