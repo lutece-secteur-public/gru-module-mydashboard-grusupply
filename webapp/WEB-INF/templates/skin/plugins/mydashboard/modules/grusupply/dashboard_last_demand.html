@@ -24,7 +24,7 @@
 			<@cText type='span' class='ml-3'>Mes dernières démarches</@cText>
 		</@cTitle>
 			<#if list_demands?? && list_demands?has_content>
-				<@tabDemands listDemandDashboard=list_demands />
+				<@tabDemands listDemandDashboard=list_demands class='demand-last'/>
 				<@cRow>
 					<@cCol>
 						<@cLink href="jsp/site/Portal.jsp?page=mydashboard&cat=all&panel=mes_demandes" label=''>

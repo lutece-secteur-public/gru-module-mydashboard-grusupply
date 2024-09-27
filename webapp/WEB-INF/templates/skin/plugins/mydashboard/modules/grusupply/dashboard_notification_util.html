@@ -35,7 +35,7 @@
 	<#return 'color:#'+ color +' !important;'/>
 </#function>
   
-<#macro tabDemands listDemandDashboard>
+<#macro tabDemands listDemandDashboard class>
 <@cTable themed=false caption='Liste des demandes'>
     <@cThead>
       <@cTr>
@@ -50,7 +50,7 @@
  	 <#assign demand = demandDashboard.demand>
     	<#if getDemandType( demand_types_list, demand.typeId )?has_content><#assign demand_type = getDemandType( demand_types_list, demand.typeId)></#if>
         <#if demand_type??>
-        <@cTr id="demand-head-${(demand.UID)!}" class="demand-head bg-content" params='data-id="${(demand.UID)!}" data-type-id="${(demand.typeId)!}" style="${getBgColor(demandDashboard.status?upper_case)}"'>
+        <@cTr id="${class}-${(demand.UID)!}" class="${class} bg-content" params='data-id="${(demand.UID)!}" data-type-id="${(demand.typeId)!}" style="${getBgColor(demandDashboard.status?upper_case)}"'>
           <@cTd params='data-label="Type : "' nospan=true>
             <strong>${(demand_type.label)!}</strong>
 	 		<#if demandDashboard.listNotification??>
@@ -94,12 +94,12 @@
   </#list>
   </@cTbody>
 </@cTable>
-</#macro>
 <script>
 $(document).ready( function( ) {
-  $(".demand-head").click( function(e) {
-    var idDemand = $(this).data("id")
+	$('body').on('click','.${class}', function(){
+    var idDemand = $(this).data("id");
     $('.msg-' + idDemand).toggle();
   });
 });
 </script>
+</#macro>

@@ -11,7 +11,7 @@
 			</@cTitle>
 			<#if list_demands?? && list_demands?has_content>
 				<div class="form">
-					<@tabDemands listDemandDashboard=list_demands />
+					<@tabDemands listDemandDashboard=list_demands class='demand-comp' />
 				</div>
 				<@cPagination paginator=paginator fragment='demands' />
 			<#else>
