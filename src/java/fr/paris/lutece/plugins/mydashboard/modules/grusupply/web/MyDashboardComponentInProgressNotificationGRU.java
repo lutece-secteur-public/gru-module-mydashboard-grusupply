@@ -52,8 +52,10 @@ import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificatio
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.IdentityDto;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardHome;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.IdentityStoreService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
 import fr.paris.lutece.portal.service.i18n.I18nService;
@@ -116,7 +118,8 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
 
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
-            DemandResult demandResult = _notificationService.getListDemandByStatus( user.getName( ), getListStatusInProgress( ) ,strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ) );
+            IdentityDto identity = IdentityStoreService.getIdentityByGuid( user.getName( ) );
+            DemandResult demandResult = _notificationService.getListDemandByStatus( identity.getCustomerId( ), getListStatusInProgress( ) ,strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ) );
 
             // PAGINATOR
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
@@ -125,7 +128,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
                         AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ), AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex, demandResult.getNumberResult( ),
                         request.getLocale( ) );
     
-                List<DemandDashboard> listDemandDashboards = getDemandDashboardList( user, paginator );                
+                List<DemandDashboard> listDemandDashboards = getDemandDashboardList( identity.getCustomerId( ), paginator );                
                 setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards );
             }
 
@@ -155,7 +158,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
      * @param paginator
      * @return list of demand dashboard
      */
-    private List<DemandDashboard> getDemandDashboardList( LuteceUser user, LocalizedDelegatePaginator<DemandDisplay> paginator )
+    private List<DemandDashboard> getDemandDashboardList( String strCustomerId, LocalizedDelegatePaginator<DemandDisplay> paginator )
     {
         List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
         
@@ -163,7 +166,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
         {
             for( DemandDisplay demand : paginator.getPageItems( ) )
             {
-                NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), user.getName( ) );
+                NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), strCustomerId );
 
                 DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                 demandDashboard.setStatus( demand.getStatus( ) );

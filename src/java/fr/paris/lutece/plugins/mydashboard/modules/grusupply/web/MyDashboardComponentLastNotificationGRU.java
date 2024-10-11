@@ -50,8 +50,10 @@ import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificatio
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.IdentityDto;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardHome;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.IdentityStoreService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
 import fr.paris.lutece.portal.service.i18n.I18nService;
@@ -95,14 +97,16 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
         {
             Map<String, Object> model = new HashMap<>( );
             
-            DemandResult demandResult = _notificationService.getListDemand( user.getName( ), "1", PROPERTY_LIMIT_RESULT, EnumNotificationType.MYDASHBOARD.toString( ) );
+            IdentityDto identity = IdentityStoreService.getIdentityByGuid( user.getName( ) );
+
+            DemandResult demandResult = _notificationService.getListDemand( identity.getCustomerId( ), "1", PROPERTY_LIMIT_RESULT, EnumNotificationType.MYDASHBOARD.toString( ) );
             List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
             
             if ( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
                 for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
                 {
-                    NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), user.getName( ) );
+                    NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), identity.getCustomerId( ) );
                     
                     DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                     demandDashboard.setDemand( demand.getDemand( ) );
