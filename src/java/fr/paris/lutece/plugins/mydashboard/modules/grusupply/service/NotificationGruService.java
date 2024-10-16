@@ -100,13 +100,14 @@ public class NotificationGruService
      * @param strIndex
      * @param strLimitResult
      * @param strNotificationType
+     * @param strCategoryCode
      * @return list of demand by list of status
      */
-    public DemandResult getListDemandByStatus( String strCustomerId, String strListStatus, String strIndex, String strLimitResult, String strNotificationType )
+    public DemandResult getListDemandByStatus( String strCustomerId, String strListStatus, String strIndex, String strLimitResult, String strNotificationType, String strCategoryCode )
     {
         try
         {
-            return _notificationStoreProvider.getListOfDemandByStatus( strCustomerId, strListStatus, null, strIndex, strLimitResult, strNotificationType );
+            return _notificationStoreProvider.getListOfDemandByStatus( strCustomerId, strListStatus, null, strIndex, strLimitResult, strNotificationType, strCategoryCode );
         }
         catch ( NotificationException e )
         {

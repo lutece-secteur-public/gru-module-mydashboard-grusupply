@@ -95,7 +95,10 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     private static final String    MARK_NB_ITEMS_PER_PAGE             = "nb_items_per_page";
     private static final String    MARK_PAGINATOR                     = "paginator";
     private static final String    MARK_DEMAND_TYPE_LIST              = "demand_types_list";
-
+    
+    // PARAMETERS
+    private static final String    PARAMETER_CATEGORY_CODE            = "cat";
+    
     @Inject
     @Named( NotificationGruService.BEAN_NAME )
     private NotificationGruService _notificationService;
@@ -104,7 +107,8 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     public String getDashboardData( HttpServletRequest request )
     {
         LuteceUser user = SecurityService.getInstance( ).getRegisteredUser( request );
-
+        String categoryCode = request.getParameter( PARAMETER_CATEGORY_CODE );
+        
         if ( user != null )
         {
             Map<String, Object> model = new HashMap<>( );
@@ -119,7 +123,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
             IdentityDto identity = IdentityStoreService.getIdentityByGuid( user.getName( ) );
-            DemandResult demandResult = _notificationService.getListDemandByStatus( identity.getCustomerId( ), getListStatusInProgress( ) ,strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ) );
+            DemandResult demandResult = _notificationService.getListDemandByStatus( identity.getCustomerId( ), getListStatusInProgress( ) ,strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ), categoryCode );
 
             // PAGINATOR
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
