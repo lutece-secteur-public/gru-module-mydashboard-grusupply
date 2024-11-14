@@ -154,19 +154,4 @@ public class NotificationGruService
         return Collections.emptyList();
     }
     
-    /**
-     * Get list of demand status
-     * @return list of demand status
-     */
-    public List<DemandStatus> getDemandStatusList ( )
-    {
-        try
-        {
-            return _notificationStoreProvider.getStatusList( );
-        } catch ( NotificationException e )
-        {
-            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des status", e.getMessage( ) );  
-        }
-        return Collections.emptyList();
-    }
 }

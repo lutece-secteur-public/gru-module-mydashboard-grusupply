@@ -51,6 +51,7 @@ import fr.paris.lutece.plugins.grubusiness.business.demand.DemandStatus;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
+import fr.paris.lutece.plugins.grubusiness.business.web.rs.EnumGenericStatus;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.IdentityDto;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
@@ -208,17 +209,14 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
      */
     private String getListStatusCompleted( )
     {
-        List<DemandStatus> listDemandStatus = _notificationService.getDemandStatusList( );
         StringBuilder listStatusInProgress = new StringBuilder( ); 
-        for( DemandStatus demandStatus : listDemandStatus )
+        for( EnumGenericStatus genericStatus : EnumGenericStatus.values( ) )
         {
-            if( demandStatus.getGenericStatus( ) != null && 
-                    demandStatus.getGenericStatus( ).isFinalStatus( ) )
+            if( genericStatus.isFinalStatus( ) )
             {
-                listStatusInProgress.append( demandStatus.getId( ) + ",");
+                listStatusInProgress.append( genericStatus.getStatusId( ) + ",");
             }
-        }
-        
+        }       
         return listStatusInProgress.toString( );
     }
     
