@@ -38,7 +38,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import fr.paris.lutece.plugins.grubusiness.business.demand.DemandStatus;
+import fr.paris.lutece.plugins.grubusiness.business.demand.TemporaryStatus;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
