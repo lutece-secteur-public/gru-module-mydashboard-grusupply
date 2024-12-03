@@ -125,11 +125,11 @@ public class NotificationGruService
      * @param strIsRead
      * @return list of notification
      */
-    public NotificationResult getListNotification( String strIdDemand, String strIdDemandType, String strCustomerId )
+    public NotificationResult getListNotification( String strIdDemand, String strIdDemandType, String strCustomerId, String strNotificationType)
     {        
         try
         {
-            return _notificationStoreProvider.getListNotification( strCustomerId, strIdDemand, strIdDemandType );
+            return _notificationStoreProvider.getListNotification( strCustomerId, strIdDemand, strIdDemandType, strNotificationType );
         } catch ( NotificationException e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des notifications de l'utilisateur {}", strCustomerId, e.getMessage( ) );

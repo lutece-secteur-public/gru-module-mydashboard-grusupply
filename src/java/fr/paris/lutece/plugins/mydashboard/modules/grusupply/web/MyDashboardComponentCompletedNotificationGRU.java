@@ -171,7 +171,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
         {
             for( DemandDisplay demand : paginator.getPageItems( ) )
             {
-                NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), strCustomerId );
+                NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), strCustomerId, EnumNotificationType.MYDASHBOARD.name( ));
 
                 DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                 demandDashboard.setStatus( demand.getStatus( ) );

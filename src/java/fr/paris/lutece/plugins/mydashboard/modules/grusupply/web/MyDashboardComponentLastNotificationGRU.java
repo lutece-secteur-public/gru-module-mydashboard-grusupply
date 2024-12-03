@@ -106,7 +106,7 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
             {
                 for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
                 {
-                    NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), identity.getCustomerId( ) );
+                    NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), identity.getCustomerId( ), EnumNotificationType.MYDASHBOARD.name( ) );
                     
                     DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                     demandDashboard.setDemand( demand.getDemand( ) );
