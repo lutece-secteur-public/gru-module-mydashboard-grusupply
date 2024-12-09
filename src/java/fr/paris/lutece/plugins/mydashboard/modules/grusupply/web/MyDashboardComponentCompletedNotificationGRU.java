@@ -47,7 +47,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import fr.paris.lutece.plugins.grubusiness.business.demand.TemporaryStatus;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
@@ -85,7 +84,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     private static final String    TEMPLATE_NOTIFICATION_LIST         = "skin/plugins/mydashboard/modules/grusupply/dashboard_completed_demand.html";
     private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentCompletedNotif";
     private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentCompletedNotification.description";
-    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index";
+    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index_cn";
 
     // PROPERTIES
     private static final String    PROPERTY_NUMBER_OF_DEMAND_PER_PAGE = "mydashboard-grusupply.limit.result.notification";
@@ -99,6 +98,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     
     // PARAMETERS
     private static final String    PARAMETER_CATEGORY_CODE            = "cat";
+    private static final String    PARAMETER_INDEX_PAGE               = "page_index_cn";
 
     @Inject
     @Named( NotificationGruService.BEAN_NAME )
@@ -109,6 +109,12 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     {
         LuteceUser user = SecurityService.getInstance( ).getRegisteredUser( request );
         String categoryCode = request.getParameter( PARAMETER_CATEGORY_CODE );
+        String strUrl = AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES );
+        
+        if( StringUtils.isNotEmpty( categoryCode ))
+        {
+            strUrl = strUrl + "&cat=" + categoryCode;
+        }
         
         if ( user != null )
         {
@@ -118,7 +124,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
 
             String strCurrentPageIndex = session.getAttribute( CURRENT_PAGE_INDEX ) != null ? ( String ) session.getAttribute( CURRENT_PAGE_INDEX ) : null;
 
-            strCurrentPageIndex = AbstractPaginator.getPageIndex( request, AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex );
+            strCurrentPageIndex = AbstractPaginator.getPageIndex( request, PARAMETER_INDEX_PAGE, strCurrentPageIndex );
             session.setAttribute( CURRENT_PAGE_INDEX, strCurrentPageIndex );
 
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
@@ -130,7 +136,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
                 LocalizedDelegatePaginator<DemandDisplay> paginator = new LocalizedDelegatePaginator<>( demandResult.getListDemandDisplay( ), nDefaultItemsPerPage,
-                        AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ), AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex, demandResult.getNumberResult( ),
+                        strUrl, PARAMETER_INDEX_PAGE, strCurrentPageIndex, demandResult.getNumberResult( ),
                         request.getLocale( ) );
     
                 List<DemandDashboard> listDemandDashboards = getDemandDashboardList( identity.getCustomerId( ), paginator );                
