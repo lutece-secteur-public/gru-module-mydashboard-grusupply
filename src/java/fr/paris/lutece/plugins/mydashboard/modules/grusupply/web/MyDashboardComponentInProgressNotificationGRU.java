@@ -85,7 +85,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     private static final String    TEMPLATE_NOTIFICATION_LIST         = "skin/plugins/mydashboard/modules/grusupply/dashboard_in_progress_demand.html";
     private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentInProgNotif";
     private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentInProgressNotification.description";
-    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index";
+    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index_n";
 
     // PROPERTIES
     private static final String    PROPERTY_NUMBER_OF_DEMAND_PER_PAGE = "mydashboard-grusupply.limit.result.notification";
@@ -99,6 +99,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     
     // PARAMETERS
     private static final String    PARAMETER_CATEGORY_CODE            = "cat";
+    private static final String    PARAMETER_INDEX_PAGE               = "page_index_n";
     
     @Inject
     @Named( NotificationGruService.BEAN_NAME )
@@ -110,6 +111,13 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
         LuteceUser user = SecurityService.getInstance( ).getRegisteredUser( request );
         String categoryCode = request.getParameter( PARAMETER_CATEGORY_CODE );
         
+        String strUrl = AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES );
+        
+        if( StringUtils.isNotEmpty( categoryCode ))
+        {
+            strUrl = strUrl + "&cat=" + categoryCode;
+        }
+        
         if ( user != null )
         {
             Map<String, Object> model = new HashMap<>( );
@@ -118,7 +126,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
 
             String strCurrentPageIndex = session.getAttribute( CURRENT_PAGE_INDEX ) != null ? ( String ) session.getAttribute( CURRENT_PAGE_INDEX ) : null;
 
-            strCurrentPageIndex = AbstractPaginator.getPageIndex( request, AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex );
+            strCurrentPageIndex = AbstractPaginator.getPageIndex( request, PARAMETER_INDEX_PAGE, strCurrentPageIndex );
             session.setAttribute( CURRENT_PAGE_INDEX, strCurrentPageIndex );
 
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
@@ -130,7 +138,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
                 LocalizedDelegatePaginator<DemandDisplay> paginator = new LocalizedDelegatePaginator<>( demandResult.getListDemandDisplay( ), nDefaultItemsPerPage,
-                        AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ), AbstractPaginator.PARAMETER_PAGE_INDEX, strCurrentPageIndex, demandResult.getNumberResult( ),
+                        strUrl, PARAMETER_INDEX_PAGE, strCurrentPageIndex, demandResult.getNumberResult( ),
                         request.getLocale( ) );
     
                 List<DemandDashboard> listDemandDashboards = getDemandDashboardList( identity.getCustomerId( ), paginator );                
