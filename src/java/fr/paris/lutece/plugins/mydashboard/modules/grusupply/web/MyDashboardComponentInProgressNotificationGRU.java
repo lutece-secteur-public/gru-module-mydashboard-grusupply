@@ -99,6 +99,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     
     // PARAMETERS
     private static final String    PARAMETER_CATEGORY_CODE            = "cat";
+    private static final String    PARAMETER_PANEL                    = "panel";
     private static final String    PARAMETER_INDEX_PAGE               = "page_index_n";
     
     @Inject
@@ -111,7 +112,7 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
         LuteceUser user = SecurityService.getInstance( ).getRegisteredUser( request );
         String categoryCode = request.getParameter( PARAMETER_CATEGORY_CODE );
         
-        String strUrl = AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES );
+        String strUrl = AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ) + request.getParameter( PARAMETER_PANEL );
         
         if( StringUtils.isNotEmpty( categoryCode ))
         {
