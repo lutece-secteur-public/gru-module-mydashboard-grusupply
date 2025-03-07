@@ -13,7 +13,7 @@
     <artifactId>module-mydashboard-grusupply</artifactId>
     <packaging>lutece-plugin</packaging>
     
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>Lutece mydashboard grusupply module</name>
 
     <repositories>
@@ -72,7 +72,7 @@
         <connection>scm:git:https://github.com/lutece-secteur-public/gru-module-mydashboard-grusupply.git</connection>
         <developerConnection>scm:git:https://github.com/lutece-secteur-public/gru-module-mydashboard-grusupply.git</developerConnection>
         <url>https://github.com/lutece-secteur-public/gru-module-mydashboard-grusupply.git</url>
-      <tag>module-mydashboard-grusupply-1.0.1</tag>
+      <tag>HEAD</tag>
   </scm>
 
 </project>
