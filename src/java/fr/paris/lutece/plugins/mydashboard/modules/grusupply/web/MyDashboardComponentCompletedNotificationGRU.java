@@ -33,6 +33,7 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
@@ -63,7 +65,7 @@ import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.portal.service.security.SecurityService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
-import fr.paris.lutece.portal.web.util.LocalizedDelegatePaginator;
+import fr.paris.lutece.portal.web.util.LocalizedPaginator;
 import fr.paris.lutece.util.html.AbstractPaginator;
 import fr.paris.lutece.util.html.HtmlTemplate;
 
@@ -100,6 +102,8 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     private static final String    PARAMETER_CATEGORY_CODE            = "cat";
     private static final String    PARAMETER_PANEL                    = "panel";
     private static final String    PARAMETER_INDEX_PAGE               = "page_index_cn";
+    private static final String    PARAMETER_INPUT_DATE               = "date";
+    private static final String    PARAMETER_INPUT_SEARCH             = "search";
 
     @Inject
     @Named( NotificationGruService.BEAN_NAME )
@@ -110,6 +114,8 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     {
         LuteceUser user = SecurityService.getInstance( ).getRegisteredUser( request );
         String categoryCode = request.getParameter( PARAMETER_CATEGORY_CODE );
+        String inputDate = request.getParameter( PARAMETER_INPUT_DATE );
+        String inputSearch = request.getParameter( PARAMETER_INPUT_SEARCH );
 
         String strUrl = AppPropertiesService.getProperty( PROPERTY_URL_MES_DEMARCHES ) + request.getParameter( PARAMETER_PANEL );
         
@@ -132,17 +138,26 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
             IdentityDto identity = IdentityStoreService.getIdentityByGuid( user.getName( ) );
-            DemandResult demandResult = _notificationService.getListDemandByStatus( identity.getCustomerId( ), getListStatusCompleted( ) ,strCurrentPageIndex, String.valueOf( nDefaultItemsPerPage ), EnumNotificationType.MYDASHBOARD.toString( ), categoryCode );
+            DemandResult demandResult = _notificationService.getListDemandByStatus( identity.getCustomerId( ), getListStatusCompleted( ) , null, null, EnumNotificationType.MYDASHBOARD.toString( ), categoryCode );
 
             // PAGINATOR
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
-                LocalizedDelegatePaginator<DemandDisplay> paginator = new LocalizedDelegatePaginator<>( demandResult.getListDemandDisplay( ), nDefaultItemsPerPage,
-                        strUrl, PARAMETER_INDEX_PAGE, strCurrentPageIndex, demandResult.getNumberResult( ),
-                        request.getLocale( ) );
-    
-                List<DemandDashboard> listDemandDashboards = getDemandDashboardList( identity.getCustomerId( ), paginator );                
-                setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards );
+                List<DemandDashboard> listDemandDashboards = getDemandDashboardList( identity.getCustomerId( ), demandResult.getListDemandDisplay( ) );
+                List<DemandType> listDemandType = _notificationService.getListDemandType( );
+                if ( StringUtils.isNotEmpty( inputDate ) )
+                {
+                    listDemandDashboards = _notificationService.filterByDate( listDemandDashboards, LocalDate.parse( inputDate ) );
+                }
+                if ( StringUtils.isNotEmpty( inputSearch ) )
+                {
+                    listDemandDashboards = _notificationService.filterByKeyword( listDemandDashboards, inputSearch.toLowerCase( ), listDemandType );
+                }
+                
+                LocalizedPaginator<DemandDashboard> paginator = new LocalizedPaginator<>( listDemandDashboards, nDefaultItemsPerPage,
+                        strUrl, PARAMETER_INDEX_PAGE, strCurrentPageIndex, request.getLocale( ) );
+                
+                setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards, listDemandType );
             }
 
             HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_LIST, request.getLocale( ), model );
@@ -171,13 +186,13 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
      * @param paginator
      * @return list of demand dashboard
      */
-    private List<DemandDashboard> getDemandDashboardList( String strCustomerId, LocalizedDelegatePaginator<DemandDisplay> paginator )
+    private List<DemandDashboard> getDemandDashboardList( String strCustomerId, List<DemandDisplay> listDemandDisplay )
     {
         List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
         
-        if ( CollectionUtils.isNotEmpty( paginator.getPageItems( ) ) )
+        if ( CollectionUtils.isNotEmpty( listDemandDisplay ) )
         {
-            for( DemandDisplay demand : paginator.getPageItems( ) )
+            for( DemandDisplay demand : listDemandDisplay )
             {
                 NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), strCustomerId, EnumNotificationType.MYDASHBOARD.name( ));
 
@@ -203,12 +218,12 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
      * @param paginator
      * @param listDemandDashboards
      */
-    private void setModel( Map<String, Object> model, int nDefaultItemsPerPage, LocalizedDelegatePaginator<DemandDisplay> paginator, List<DemandDashboard> listDemandDashboards )
+    private void setModel( Map<String, Object> model, int nDefaultItemsPerPage, LocalizedPaginator<DemandDashboard> paginator, List<DemandDashboard> listDemandDashboards, List<DemandType> listDemandType )
     {
-        model.put( MARK_DEMAND_TYPE_LIST, _notificationService.getListDemandType( ) );
+        model.put( MARK_DEMAND_TYPE_LIST, listDemandType );
         model.put( MARK_NB_ITEMS_PER_PAGE, nDefaultItemsPerPage );
         model.put( MARK_PAGINATOR, paginator );
-        model.put( MARK_LIST_DEMAND, listDemandDashboards );
+        model.put( MARK_LIST_DEMAND, paginator.getPageItems( ) );
     }
     
     /**
