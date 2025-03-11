@@ -39,12 +39,20 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import fr.paris.lutece.plugins.grubusiness.business.demand.TemporaryStatus;
+import fr.paris.lutece.plugins.grubusiness.business.notification.Notification;
+import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
 import fr.paris.lutece.plugins.grubusiness.service.notification.NotificationException;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
 import fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.NotificationStoreTransportRest;
 import fr.paris.lutece.portal.service.util.AppLogService;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
 
 /**
@@ -152,6 +160,128 @@ public class NotificationGruService
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
         }
         return Collections.emptyList();
+    }
+    
+    /**
+     * Filter demand by date
+     * 
+     * @return list of demand dashboard filtered by date
+     */
+    public List<DemandDashboard> filterByDate( List<DemandDashboard> listDemandDashboards, LocalDate inputLocalDate )
+    {
+        List<DemandDashboard> filteredList = new ArrayList<>( );
+
+        for ( DemandDashboard dashboard : listDemandDashboards )
+        {
+            Demand demand = dashboard.getDemand( );
+            List<Notification> notifications = dashboard.getListNotification( );
+
+            boolean matchesDate = false;
+
+            if ( demand != null )
+            {
+                LocalDate creationDate = Instant.ofEpochMilli( demand.getCreationDate( ) ).atZone( ZoneId.systemDefault( ) ).toLocalDate( );
+                LocalDate modifyDate = Instant.ofEpochMilli( demand.getModifyDate( ) ).atZone( ZoneId.systemDefault( ) ).toLocalDate( );
+                if ( creationDate.equals( inputLocalDate ) || modifyDate.equals( inputLocalDate ) )
+                {
+                    matchesDate = true;
+                }
+            }
+            
+            if ( !matchesDate && notifications != null )
+            {
+                for ( Notification notif : notifications )
+                {
+                    if ( notif.getDate( ) != null )
+                    {
+                        LocalDate notifDate = Instant.ofEpochMilli( notif.getDate( ) ).atZone( ZoneId.systemDefault( ) ).toLocalDate( );
+                        if ( notifDate.equals( inputLocalDate ) )
+                        {
+                            matchesDate = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            if ( matchesDate )
+            {
+                filteredList.add( dashboard );
+            }
+        }
+
+        return filteredList;
+    }
+    
+    /**
+     * Filter demand by keyword
+     * 
+     * @return list of demand dashboard filtered by keyword
+     */
+    public List<DemandDashboard> filterByKeyword( List<DemandDashboard> listDemandDashboards, String inputKeyword, List<DemandType> listDemandType )
+    {
+        List<DemandDashboard> filteredList = new ArrayList<>( );
+
+        for ( DemandDashboard dashboard : listDemandDashboards )
+        {
+            List<Notification> notifications = dashboard.getListNotification( );
+
+            boolean matchesKeyword = false;
+
+            if ( notifications != null )
+            {
+                for ( Notification notif : notifications )
+                {
+                    if ( notif.getMyDashboardNotification( ) != null )
+                    {
+                        if ( notif.getMyDashboardNotification( ).getMessage( ) != null && notif.getMyDashboardNotification( ).getMessage( ).toLowerCase( ).contains( inputKeyword ) )
+                        {
+                            matchesKeyword = true;
+                            break;
+                        }
+
+                        if ( notif.getMyDashboardNotification( ).getStatusText( ) != null && notif.getMyDashboardNotification( ).getStatusText( ).toLowerCase( ).contains( inputKeyword ) )
+                        {
+                            matchesKeyword = true;
+                            break;
+                        }
+
+                        if ( notif.getMyDashboardNotification( ).getSubject( ) != null && notif.getMyDashboardNotification( ).getSubject( ).toLowerCase( ).contains( inputKeyword ) )
+                        {
+                            matchesKeyword = true;
+                            break;
+                        }
+
+                        if ( notif.getMyDashboardNotification( ).getSenderName( ) != null && notif.getMyDashboardNotification( ).getSenderName( ).toLowerCase( ).contains( inputKeyword ) )
+                        {
+                            matchesKeyword = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            Demand demand = dashboard.getDemand( );
+            if ( demand != null && demand.getTypeId( ) != null && listDemandType != null )
+            {
+                for ( DemandType demandType : listDemandType )
+                {
+                    if ( String.valueOf( demandType.getIdDemandType( ) ).equals( demand.getTypeId( ) ) && 
+                         demandType.getLabel( ) != null && demandType.getLabel( ).toLowerCase( ).contains( inputKeyword ) )
+                    {
+                        matchesKeyword = true;
+                        break;
+                    }
+                }
+            }
+
+            if ( matchesKeyword )
+            {
+                filteredList.add( dashboard );
+            }
+        }
+
+        return filteredList;
     }
     
 }
