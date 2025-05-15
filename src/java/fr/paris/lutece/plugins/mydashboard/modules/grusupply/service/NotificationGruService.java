@@ -41,6 +41,7 @@ import javax.inject.Named;
 import fr.paris.lutece.plugins.grubusiness.business.demand.TemporaryStatus;
 import fr.paris.lutece.plugins.grubusiness.business.notification.Notification;
 import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandCategory;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
@@ -155,11 +156,29 @@ public class NotificationGruService
         try
         {
             return _notificationStoreProvider.getDemandTypes( );
+            
         } catch ( NotificationException e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
         }
         return Collections.emptyList();
+    }
+    
+    /**
+     * Get list of demand categories
+     * @return list of demand categories
+     */
+    public List<DemandCategory> getListDemandCategories( )
+    {
+        try
+        {
+            return _notificationStoreProvider.getCategoriesList( );
+            
+        } catch ( NotificationException e )
+        {
+            AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des catégories", e.getMessage( ) );  
+        }
+        return Collections.emptyList(); 
     }
     
     /**

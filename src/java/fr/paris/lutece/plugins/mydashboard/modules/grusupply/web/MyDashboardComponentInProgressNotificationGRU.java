@@ -48,6 +48,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandCategory;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandDisplay;
@@ -97,13 +98,15 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     private static final String    MARK_NB_ITEMS_PER_PAGE             = "nb_items_per_page";
     private static final String    MARK_PAGINATOR                     = "paginator";
     private static final String    MARK_DEMAND_TYPE_LIST              = "demand_types_list";
-    
+    private static final String    MARK_LIST_CATEGORIES               = "categoryList";
+   
     // PARAMETERS
     private static final String    PARAMETER_CATEGORY_CODE            = "cat";
     private static final String    PARAMETER_PANEL                    = "panel";
     private static final String    PARAMETER_INDEX_PAGE               = "page_index_n";
     private static final String    PARAMETER_INPUT_DATE               = "date";
     private static final String    PARAMETER_INPUT_SEARCH             = "search";
+    private static final String    SESSION_CATEGORIES                 = "categories";
     
     @Inject
     @Named( NotificationGruService.BEAN_NAME )
@@ -159,8 +162,10 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
                         strUrl, PARAMETER_INDEX_PAGE, strCurrentPageIndex, request.getLocale( ) );
                 
                 setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards, listDemandType );
+                model.put( MARK_LIST_CATEGORIES, getListCategories( demandResult, listDemandType, request ) );
+           
             }
-
+            
             HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_LIST, request.getLocale( ), model );
 
             return htmTemplate.getHtml( );
@@ -242,6 +247,63 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
             }
         }       
         return listStatusInProgress.toString( );
+    }
+    
+    /**
+     * Returns the list of categories of user demands
+     * @param listDemandDashboards
+     * @param listDemandTypes
+     * @return the list of categories of user demands
+     */
+    private Map<String,String> getListCategories( DemandResult demandResult, List<DemandType> listDemandTypes, HttpServletRequest request )
+    {      
+        Map<String,String> categories = ( Map<String, String> ) request.getSession( ).getAttribute( SESSION_CATEGORIES );
+        
+        if( categories == null || categories.size( ) < 1 )
+        {
+            categories = new HashMap<>();
+            for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
+            {
+                if( demand.getDemand( ) != null && StringUtils.isNotEmpty( demand.getDemand( ).getTypeId( ) ) )
+                {
+                    DemandType type = getDemandTypeByIdDemandeType( listDemandTypes, Integer.parseInt( demand.getDemand( ).getTypeId( ) ) );
+    
+                    for( DemandCategory category : _notificationService.getListDemandCategories( ) )
+                    {
+                        if( type != null && type.getCategory( ).equals( category.getCode( ) ) )
+                        {
+                            categories.put( category.getCode( ), category.getLabel( ) );
+                        }
+                    }
+                }
+            }
+            
+            request.getSession( ).setAttribute( SESSION_CATEGORIES, categories );
+        }
+        
+        return categories;
+        
+    }
+    
+    /**
+     * Get demand type by id demand type
+     * @param listDemandType
+     * @param nIdDemandType
+     * @return the demand type
+     */
+    private DemandType getDemandTypeByIdDemandeType( List<DemandType> listDemandType, int nIdDemandType )
+    {
+        if( listDemandType != null )
+        {
+            for( DemandType type : listDemandType )
+            {
+                if( type.getIdDemandType( ) == nIdDemandType )
+                {
+                    return type;
+                }
+            }
+        }
+        return null;
     }
     
 }
