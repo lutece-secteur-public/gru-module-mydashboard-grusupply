@@ -105,10 +105,6 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     private static final String    PARAMETER_INPUT_DATE               = "date";
     private static final String    PARAMETER_INPUT_SEARCH             = "search";
 
-    @Inject
-    @Named( NotificationGruService.BEAN_NAME )
-    private NotificationGruService _notificationService;
-
     @Override
     public String getDashboardData( HttpServletRequest request )
     {
@@ -138,20 +134,20 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
             int nDefaultItemsPerPage = AppPropertiesService.getPropertyInt( PROPERTY_NUMBER_OF_DEMAND_PER_PAGE, 10 );
 
             IdentityDto identity = IdentityStoreService.getIdentityByGuid( user.getName( ) );
-            DemandResult demandResult = _notificationService.getListDemandByStatus( identity.getCustomerId( ), getListStatusCompleted( ) , null, null, EnumNotificationType.MYDASHBOARD.toString( ), categoryCode );
+            DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( identity.getCustomerId( ), getListStatusCompleted( ) , null, null, EnumNotificationType.MYDASHBOARD.toString( ), categoryCode );
 
             // PAGINATOR
             if( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
                 List<DemandDashboard> listDemandDashboards = getDemandDashboardList( identity.getCustomerId( ), demandResult.getListDemandDisplay( ) );
-                List<DemandType> listDemandType = _notificationService.getListDemandType( );
+                List<DemandType> listDemandType = NotificationGruService.getInstance( ).getListDemandType( );
                 if ( StringUtils.isNotEmpty( inputDate ) )
                 {
-                    listDemandDashboards = _notificationService.filterByDate( listDemandDashboards, LocalDate.parse( inputDate ) );
+                    listDemandDashboards = NotificationGruService.getInstance( ).filterByDate( listDemandDashboards, LocalDate.parse( inputDate ) );
                 }
                 if ( StringUtils.isNotEmpty( inputSearch ) )
                 {
-                    listDemandDashboards = _notificationService.filterByKeyword( listDemandDashboards, inputSearch.toLowerCase( ), listDemandType );
+                    listDemandDashboards = NotificationGruService.getInstance( ).filterByKeyword( listDemandDashboards, inputSearch.toLowerCase( ), listDemandType );
                 }
                 
                 LocalizedPaginator<DemandDashboard> paginator = new LocalizedPaginator<>( listDemandDashboards, nDefaultItemsPerPage,
@@ -194,7 +190,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
         {
             for( DemandDisplay demand : listDemandDisplay )
             {
-                NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), strCustomerId, EnumNotificationType.MYDASHBOARD.name( ));
+                NotificationResult notificationList = NotificationGruService.getInstance( ).getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), strCustomerId, EnumNotificationType.MYDASHBOARD.name( ));
 
                 DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                 demandDashboard.setStatus( demand.getStatus( ) );
