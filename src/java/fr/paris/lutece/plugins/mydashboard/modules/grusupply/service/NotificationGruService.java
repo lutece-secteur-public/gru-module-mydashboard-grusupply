@@ -35,10 +35,9 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.service;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Named;
 
-import fr.paris.lutece.plugins.grubusiness.business.demand.TemporaryStatus;
+import org.apache.commons.collections.CollectionUtils;
+
 import fr.paris.lutece.plugins.grubusiness.business.notification.Notification;
 import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandCategory;
@@ -47,7 +46,8 @@ import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.NotificationResult;
 import fr.paris.lutece.plugins.grubusiness.service.notification.NotificationException;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboard;
-import fr.paris.lutece.plugins.notificationstore.v1.web.rs.service.NotificationStoreTransportRest;
+import fr.paris.lutece.plugins.notificationstore.v1.web.service.NotificationStoreService;
+import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
 
 import java.time.Instant;
@@ -63,21 +63,38 @@ import java.util.Collections;
  */
 public class NotificationGruService
 {
-    // BEAN
-    public static final String  BEAN_NAME                           = "mydashboard-grusupply.notificationGruService";
-
-    @Inject
-    @Named("mydashboard-grusupply.notificationstore.restservice")
-    private NotificationStoreTransportRest _notificationStoreProvider;
-    
+    private static NotificationGruService _notificationGruService;
+    private static NotificationStoreService _notificationStoreService;
+        
     /**
      * Constructor
      */
     private NotificationGruService( )
+    {        
+    }
+    
+    /**
+     * 
+     * @return instance of NotificationGruService
+     */
+    public static NotificationGruService getInstance (  )
     {
-
+        if(  _notificationGruService == null )
+        {
+            _notificationGruService = new NotificationGruService( );
+            
+            List<NotificationStoreService> listNotificationStoreService = SpringContextService.getBeansOfType( NotificationStoreService.class );
+            
+            if( CollectionUtils.isNotEmpty( listNotificationStoreService ) )
+            {
+                _notificationStoreService =  listNotificationStoreService.get( 0 );
+            }
+        }
+        
+        return _notificationGruService;
     }
 
+    
     /**
      * Gets list of demand
      * 
@@ -91,7 +108,7 @@ public class NotificationGruService
     {
         try
         {
-            return _notificationStoreProvider.getListDemand( strCustomerId, null, strIndex, strLimitResult, strNotificationType );
+            return _notificationStoreService.getListDemand( strCustomerId, null, strIndex, strLimitResult, strNotificationType );
         }
         catch ( NotificationException e )
         {
@@ -116,7 +133,7 @@ public class NotificationGruService
     {
         try
         {
-            return _notificationStoreProvider.getListOfDemandByStatus( strCustomerId, strListStatus, null, strIndex, strLimitResult, strNotificationType, strCategoryCode );
+            return _notificationStoreService.getListOfDemandByStatus( strCustomerId, strListStatus, null, strIndex, strLimitResult, strNotificationType, strCategoryCode );
         }
         catch ( NotificationException e )
         {
@@ -138,7 +155,7 @@ public class NotificationGruService
     {        
         try
         {
-            return _notificationStoreProvider.getListNotification( strCustomerId, strIdDemand, strIdDemandType, strNotificationType );
+            return _notificationStoreService.getListNotification( strCustomerId, strIdDemand, strIdDemandType, strNotificationType );
         } catch ( NotificationException e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des notifications de l'utilisateur {}", strCustomerId, e.getMessage( ) );
@@ -155,9 +172,9 @@ public class NotificationGruService
     {
         try
         {
-            return _notificationStoreProvider.getDemandTypes( );
+            return _notificationStoreService.getDemandTypes( );
             
-        } catch ( NotificationException e )
+        } catch ( Exception e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
         }
@@ -172,9 +189,9 @@ public class NotificationGruService
     {
         try
         {
-            return _notificationStoreProvider.getCategoriesList( );
+            return _notificationStoreService.getCategoriesList( );
             
-        } catch ( NotificationException e )
+        } catch ( Exception e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des catégories", e.getMessage( ) );  
         }

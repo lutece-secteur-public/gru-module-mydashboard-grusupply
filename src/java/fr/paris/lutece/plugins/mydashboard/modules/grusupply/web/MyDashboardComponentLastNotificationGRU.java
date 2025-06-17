@@ -84,10 +84,6 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
     private static final String    MARK_DEMAND_TYPE_LIST           = "demand_types_list";
     private static final String    MARK_LIST_DEMAND                = "list_demands";
 
-    @Inject
-    @Named( NotificationGruService.BEAN_NAME )
-    private NotificationGruService _notificationService;
-
     @Override
     public String getDashboardData( HttpServletRequest request )
     {
@@ -99,14 +95,14 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
             
             IdentityDto identity = IdentityStoreService.getIdentityByGuid( user.getName( ) );
 
-            DemandResult demandResult = _notificationService.getListDemand( identity.getCustomerId( ), "1", PROPERTY_LIMIT_RESULT, EnumNotificationType.MYDASHBOARD.toString( ) );
+            DemandResult demandResult = NotificationGruService.getInstance( ).getListDemand( identity.getCustomerId( ), "1", PROPERTY_LIMIT_RESULT, EnumNotificationType.MYDASHBOARD.toString( ) );
             List<DemandDashboard> listDemandDashboards = new ArrayList<>( );
             
             if ( demandResult != null && CollectionUtils.isNotEmpty( demandResult.getListDemandDisplay( ) ) )
             {
                 for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
                 {
-                    NotificationResult notificationList = _notificationService.getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), identity.getCustomerId( ), EnumNotificationType.MYDASHBOARD.name( ) );
+                    NotificationResult notificationList = NotificationGruService.getInstance( ).getListNotification( demand.getDemand( ).getId( ), demand.getDemand( ).getTypeId( ), identity.getCustomerId( ), EnumNotificationType.MYDASHBOARD.name( ) );
                     
                     DemandDashboard demandDashboard = new DemandDashboard( demand.getDemand( ).getUID( ) , false );
                     demandDashboard.setDemand( demand.getDemand( ) );
@@ -120,7 +116,7 @@ public class MyDashboardComponentLastNotificationGRU extends MyDashboardComponen
                 listDemandDashboards = DemandDashboardHome.selectByDemandIds( listDemandDashboards );
             }
 
-            model.put( MARK_DEMAND_TYPE_LIST, _notificationService.getListDemandType( ) );
+            model.put( MARK_DEMAND_TYPE_LIST, NotificationGruService.getInstance( ).getListDemandType( ) );
             model.put( MARK_LIST_DEMAND, listDemandDashboards );
 
             HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_LAST_NOTIFICATION_LIST, request.getLocale( ), model );
