@@ -65,7 +65,8 @@ public class NotificationGruService
 {
     private static NotificationGruService _notificationGruService;
     private static NotificationStoreService _notificationStoreService;
-        
+    private static final String    DESC                            = "DESC";
+
     /**
      * Constructor
      */
@@ -108,7 +109,7 @@ public class NotificationGruService
     {
         try
         {
-            return _notificationStoreService.getListDemand( strCustomerId, null, strIndex, strLimitResult, strNotificationType );
+            return _notificationStoreService.getListDemand( strCustomerId, null, strIndex, strLimitResult, strNotificationType, DESC );
         }
         catch ( NotificationException e )
         {
