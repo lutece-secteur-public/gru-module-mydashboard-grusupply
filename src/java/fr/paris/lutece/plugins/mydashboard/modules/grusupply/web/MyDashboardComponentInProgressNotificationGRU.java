@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,6 +50,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import fr.paris.lutece.plugins.grubusiness.business.demand.Demand;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandCategory;
 import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
@@ -65,6 +68,7 @@ import fr.paris.lutece.portal.service.i18n.I18nService;
 import fr.paris.lutece.portal.service.security.LuteceUser;
 import fr.paris.lutece.portal.service.security.SecurityService;
 import fr.paris.lutece.portal.service.template.AppTemplateService;
+import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 import fr.paris.lutece.portal.web.util.LocalizedPaginator;
 import fr.paris.lutece.util.html.AbstractPaginator;
@@ -157,11 +161,10 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
                 LocalizedPaginator<DemandDashboard> paginator = new LocalizedPaginator<>( listDemandDashboards, nDefaultItemsPerPage,
                         strUrl, PARAMETER_INDEX_PAGE, strCurrentPageIndex, request.getLocale( ) );
                 
-                setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards, listDemandType );
-                model.put( MARK_LIST_CATEGORIES, getListCategories( demandResult, listDemandType, request ) );
-           
+                setModel( model, nDefaultItemsPerPage, paginator, listDemandDashboards, listDemandType );           
             }
             
+            model.put( MARK_LIST_CATEGORIES, getListCategories(identity.getCustomerId( ), categoryCode, request ) );
             HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_LIST, request.getLocale( ), model );
 
             return htmTemplate.getHtml( );
@@ -246,60 +249,78 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
     }
     
     /**
+     * Returns the list of status ids
+     * @return list of status ids.
+     */
+    private String getListStatus( )
+    {
+        StringBuilder listStatus = new StringBuilder( ); 
+        for( EnumGenericStatus genericStatus : EnumGenericStatus.values( ) )
+        {
+            listStatus.append( genericStatus.getStatusId( ) + ",");
+        }       
+        return listStatus.toString( );
+    }
+    
+    /**
      * Returns the list of categories of user demands
      * @param listDemandDashboards
      * @param listDemandTypes
      * @return the list of categories of user demands
      */
-    private Map<String,String> getListCategories( DemandResult demandResult, List<DemandType> listDemandTypes, HttpServletRequest request )
-    {      
-        Map<String,String> categories = ( Map<String, String> ) request.getSession( ).getAttribute( SESSION_CATEGORIES );
-        
-        if( categories == null || categories.size( ) < 1 )
-        {
-            categories = new HashMap<>();
-            for( DemandDisplay demand : demandResult.getListDemandDisplay( ) )
-            {
-                if( demand.getDemand( ) != null && StringUtils.isNotEmpty( demand.getDemand( ).getTypeId( ) ) )
-                {
-                    DemandType type = getDemandTypeByIdDemandeType( listDemandTypes, Integer.parseInt( demand.getDemand( ).getTypeId( ) ) );
+    private Map<String, String> getListCategories(
+            String strCustomerId,
+            String categoryCode,
+            HttpServletRequest request
+        ) {
+            @SuppressWarnings("unchecked")
+            Map<String, String> categories = (Map<String, String>) request.getSession().getAttribute(SESSION_CATEGORIES);
+
+            if (categories == null || categories.isEmpty()) {
+                try {
+                    //Demand list
+                    DemandResult demandResult = NotificationGruService.getInstance()
+                            .getListDemandByStatus(strCustomerId, getListStatus(), null, "20000",
+                                    EnumNotificationType.MYDASHBOARD.toString(), categoryCode);
+                    
+                    List<DemandType> listDemandTypes = NotificationGruService.getInstance( ).getListDemandType( );    
+                    List<DemandCategory> allCategories = NotificationGruService.getInstance().getListDemandCategories();
     
-                    for( DemandCategory category : NotificationGruService.getInstance( ).getListDemandCategories( ) )
-                    {
-                        if( type != null && type.getCategory( ).equals( category.getCode( ) ) )
-                        {
-                            categories.put( category.getCode( ), category.getLabel( ) );
+                    //Map of categories
+                    Map<String, String> categoryCodeToLabel = allCategories.stream()
+                            .collect(Collectors.toMap(DemandCategory::getCode, DemandCategory::getLabel));
+    
+                    //Map of demandType
+                    Map<Integer, DemandType> demandTypeById = listDemandTypes.stream()
+                            .collect(Collectors.toMap(DemandType::getIdDemandType, Function.identity()));
+    
+                    categories = new HashMap<>();
+    
+                    //Retrieving demand categories
+                    for (DemandDisplay demandDisplay : demandResult.getListDemandDisplay()) {
+                        Demand demand = demandDisplay.getDemand();
+                        if (demand == null || StringUtils.isEmpty(demand.getTypeId())) {
+                            continue;
+                        }
+    
+                        int typeId = Integer.parseInt(demand.getTypeId());
+                        DemandType demandType = demandTypeById.get(typeId);
+                        if (demandType != null) {
+                            String categoryCodeType = demandType.getCategory();
+                            String categoryLabel = categoryCodeToLabel.get(categoryCodeType);
+                            if (categoryLabel != null) {
+                                categories.put(categoryCodeType, categoryLabel);
+                            }
                         }
                     }
+                } catch (NumberFormatException e) {
+                    AppLogService.error( "Une erreur s'est produite lors de la récupération des categories des demandes", e.getMessage( ));
                 }
+                //Cache session
+                request.getSession().setAttribute(SESSION_CATEGORIES, categories);
             }
-            
-            request.getSession( ).setAttribute( SESSION_CATEGORIES, categories );
+
+            return categories;
         }
-        
-        return categories;
-        
-    }
-    
-    /**
-     * Get demand type by id demand type
-     * @param listDemandType
-     * @param nIdDemandType
-     * @return the demand type
-     */
-    private DemandType getDemandTypeByIdDemandeType( List<DemandType> listDemandType, int nIdDemandType )
-    {
-        if( listDemandType != null )
-        {
-            for( DemandType type : listDemandType )
-            {
-                if( type.getIdDemandType( ) == nIdDemandType )
-                {
-                    return type;
-                }
-            }
-        }
-        return null;
-    }
     
 }
