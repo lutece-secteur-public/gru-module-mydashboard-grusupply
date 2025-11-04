@@ -6,8 +6,11 @@
 
     <!-- DAO -->
 	<bean id="mydashboard-grusupply.demandDashboardDAO" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDashboardDAO " />
+	<bean id="mydashboard-grusupply.tagDemandTypeDAO" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.TagDemandTypeDAO" />
 
-
+	<!-- Service -->
+	<bean id="mydashboard-grusupply.tagDemandTypeService" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService" />
+	
 	<!-- Dashboard -->
 	<bean id="mydashboard-grusupply.myDashboardLastComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentLastNotificationGRU" />
 	<bean id="mydashboard-grusupply.myDashboardCompletedComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentCompletedNotificationGRU" />
