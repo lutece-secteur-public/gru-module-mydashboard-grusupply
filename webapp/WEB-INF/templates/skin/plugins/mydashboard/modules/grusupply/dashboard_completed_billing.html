@@ -1,0 +1,52 @@
+<#include "/commons_site.html"/>
+<#include "dashboard_notification_util.html"/>
+<@cRow>
+	<@cCol>
+		<@cTitle level=3 class='main-info-color d-block d-md-flex justify-content-between align-items-center'>
+			<@cInline class='d-flex'>
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g clip-path="url(#clip0_1544_16177)">
+                                <path d="M18 18V20C18 20.5523 17.5523 21 17 21H5C4.44772 21 4 20.5523 4 20V4C4 3.44772 4.44772 3 5 3H17M20 7.77A3 3 0 0 0 18 7H18A3 3 0 0 0 15 10H15A3 3 0 0 0 18 13H18A3 3 0 0 0 20 12.23M14 17H8M11 13H8M14 10H17M18 18V21L17 21M5 3H17M4 20V4" stroke="#354BCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_1544_16177">
+                                    <rect width="24" height="24" fill="white"/>
+                                </clipPath>
+                            </defs>
+                 </svg>
+				<@cInline type='span' class='ml-3'>Mes factures acquittées</@cInline>	
+			</@cInline>
+			<@cLink class='d-none d-sm-block ml-2 fs-sm main-info-color' id='toutes_mes_factures_completed' href='jsp/site/Portal.jsp?page=mydashboard&panel=toutes_mes_factures#billing' label='Voir toutes mes factures' />
+		</@cTitle>
+		<#if list_demands?? && list_demands?has_content>
+			<@cBlock class='form'>
+				<@tabDemands listDemandDashboard=list_demands class='demand-comp' nameDashboard="completedBilling" />
+			</@cBlock>
+			<@cPagination paginator=paginator fragment='demands' />
+		<#else>
+			<@cAlert title='Vous n\'avez aucune facture.' />
+		</#if>
+	</@cCol>
+</@cRow>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var currentUrl = window.location.href;
+        if (currentUrl.includes("panel=toutes_mes_factures")) {
+            var linkElement = document.getElementById("toutes_mes_factures_completed");
+            if (linkElement) {
+                linkElement.remove();
+            }
+        }
+        
+        //Modification de l'ancre du paginator
+        var ancre = window.location.hash;
+        const paginatorLink = document.querySelectorAll('a.page-link[href]');
+		
+        paginatorLink.forEach(link => {
+            // Modifier le href
+            const href = link.getAttribute('href').split('#')[0] + ancre;           
+            link.setAttribute('href', href);
+        });
+    });
+</script>

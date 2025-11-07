@@ -1,0 +1,36 @@
+<#include "/commons_site.html"/>
+<#include "dashboard_notification_util.html"/>
+<@cRow>
+	<@cCol>
+		<@cRow class='mt-l'>
+			<@cCol>
+				<@cRow>
+					<@cCol>
+						<@cTitle level=3 class='d-flex justify-content-between align-items-center py-3'>
+							<@cInline class='d-flex'>
+								<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#354BCF">
+									<path d="M202.87-71.87q-37.78 0-64.39-26.61t-26.61-64.39v-554.26q0-37.78 26.61-64.39t64.39-26.61H240v-80h85.5v80h309v-80H720v80h37.13q37.78 0 64.39 26.61t26.61 64.39v554.26q0 37.78-26.61 64.39t-64.39 26.61H202.87Zm0-91h554.26V-560H202.87v397.13Zm0-477.13h554.26v-77.13H202.87V-640Zm0 0v-77.13V-640Z"/>
+								</svg>
+								<@cInline type='span' class='ml-3'>Mes derniers rendez-vous</@cInline>
+							</@cInline>
+							<@cLink class='d-none d-sm-block ml-2 fs-sm main-info-color' href='jsp/site/Portal.jsp?page=mydashboard&panel=tous_mes_rendez_vous#appointments' label='Voir tous mes rendez-vous' />
+						</@cTitle>
+						<#if list_demands?? && list_demands?has_content>
+							<@tabDemands listDemandDashboard=list_demands class='demand-last' nameDashboard="lastAppointments"/>
+							<@cRow>
+								<@cCol>
+									<@cLink href="jsp/site/Portal.jsp?page=mydashboard&panel=tous_mes_rendez_vous#appointments" label=''>
+										Voir tous mes rendez-vous
+									</@cLink>
+								</@cCol>
+							</@cRow>
+						<#else>
+							<@cAlert title='Vous n\'avez fait aucun rendez-vous' />
+							<@cLink class='d-block d-sm-none mt-2 ml-2 fs-sm main-info-color' href='jsp/site/Portal.jsp?page=mydashboard&panel=tous_mes_rendez_vous#appointments' label='Voir tous mes rendez-vous' />
+						</#if>
+					</@cCol>
+				</@cRow>
+			</@cCol>
+		</@cRow>
+	</@cCol>
+</@cRow>
