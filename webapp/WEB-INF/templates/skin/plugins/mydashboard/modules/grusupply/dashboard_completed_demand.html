@@ -1,24 +1,45 @@
 <#include "/commons_site.html"/>
 <#include "dashboard_notification_util.html"/>
-<section class="container px-sm-5 py-3">
-	<div class="row">
-		<div class="col-xs-12 col-sm-12 col-md-12 pt-3">
-			<@cTitle level=3 class='d-flex align-items-center py-3'>
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+<@cRow>
+	<@cCol>
+		<@cTitle level=3 class='main-info-color d-block d-md-flex justify-content-between align-items-center'>
+			<@cInline class='d-flex'>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img" >
 					<path fill="none" stroke="#354BCF" stroke-width="2" d="M6,16 L16,16 L6,16 L6,16 Z M6,12 L18,12 L6,12 L6,12 Z M6,8 L11,8 L6,8 L6,8 Z M14,1 L14,8 L21,8 M3,23 L3,1 L15,1 L21,7 L21,23 L3,23 Z"/>
 				</svg>
-				<@cText type='span' class='ml-3'>Mes demandes terminées</@cText>
-			</@cTitle>
-			<#if list_demands?? && list_demands?has_content>
-				<div class="form">
-					<@tabDemands listDemandDashboard=list_demands class='demand-comp' />
-				</div>
-				<@cPagination paginator=paginator fragment='demands' />
-			<#else>
-				<div class="alert alert-secondary" style="min-height: auto" role="alert">
-					<p class="text-dark font-weight-bold p-3 ml-3 mb-0">Vous n'avez fait aucune demande.</p>
-				</div>	
-			</#if>
-		</div>
-	</div>
-</section>
+				<@cInline type='span' class='ml-3'>Mes demandes terminées</@cInline>	
+			</@cInline>
+			<@cLink class='d-none d-sm-block ml-2 fs-sm main-info-color' id='toutes_mes_demandes_completed' href='jsp/site/Portal.jsp?page=mydashboard&panel=toutes_mes_demandes#demands' label='Voir toutes mes demandes' />
+		</@cTitle>
+		<#if list_demands?? && list_demands?has_content>
+			<@cBlock class='form'>
+				<@tabDemands listDemandDashboard=list_demands class='demand-comp' nameDashboard="completedDemand"/>
+			</@cBlock>
+			<@cPagination paginator=paginator fragment='demands' />
+		<#else>
+			<@cAlert title='Vous n\'avez fait aucune demande.' />
+		</#if>
+	</@cCol>
+</@cRow>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var currentUrl = window.location.href;
+        if (currentUrl.includes("panel=toutes_mes_demandes")) {
+            var linkElement = document.getElementById("toutes_mes_demandes_completed");
+            if (linkElement) {
+                linkElement.remove();
+            }
+        }
+        
+        //Modification de l'ancre du paginator
+        var ancre = window.location.hash;
+        const paginatorLink = document.querySelectorAll('a.page-link[href]');
+		
+        paginatorLink.forEach(link => {
+            // Modifier le href
+            const href = link.getAttribute('href').split('#')[0] + ancre;           
+            link.setAttribute('href', href);
+        });
+    });
+</script>

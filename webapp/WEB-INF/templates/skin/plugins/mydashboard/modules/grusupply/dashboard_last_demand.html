@@ -17,23 +17,37 @@
 </@cRow>
 <@cRow>
 	<@cCol>
-		<@cTitle level=3 class='d-flex align-items-center py-3'>
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-				<path fill="none" stroke="#354BCF" stroke-width="2" d="M6,16 L16,16 L6,16 L6,16 Z M6,12 L18,12 L6,12 L6,12 Z M6,8 L11,8 L6,8 L6,8 Z M14,1 L14,8 L21,8 M3,23 L3,1 L15,1 L21,7 L21,23 L3,23 Z"/>
-			</svg>
-			<@cText type='span' class='ml-3'>Mes dernières démarches</@cText>
-		</@cTitle>
-			<#if list_demands?? && list_demands?has_content>
-				<@tabDemands listDemandDashboard=list_demands class='demand-last'/>
+		<@cRow class='mt-l'>
+			<@cCol>
 				<@cRow>
 					<@cCol>
-						<@cLink href="jsp/site/Portal.jsp?page=mydashboard&cat=all&panel=mes_demandes" label=''>
-							Toutes mes demandes
-						</@cLink>
+						<@cTitle level=3 class='d-flex justify-content-between align-items-center py-3'>
+							<@cInline class='d-flex'>
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img" >
+									<path fill="none" stroke="#354BCF" stroke-width="2" d="M6,16 L16,16 L6,16 L6,16 Z M6,12 L18,12 L6,12 L6,12 Z M6,8 L11,8 L6,8 L6,8 Z M14,1 L14,8 L21,8 M3,23 L3,1 L15,1 L21,7 L21,23 L3,23 Z"/>
+								</svg>
+								<@cInline type='span' class='ml-3'>Mes dernières demandes</@cInline>
+							</@cInline>
+							<@cLink class='d-none d-sm-block ml-2 fs-sm main-info-color' href='jsp/site/Portal.jsp?page=mydashboard&panel=toutes_mes_demandes#demands' label='Voir toutes mes demandes' />
+						</@cTitle>
+						<#if list_demands?? && list_demands?has_content>
+							<@tabDemands listDemandDashboard=list_demands class='demand-last' nameDashboard="lastDemand"/>
+							<@cRow>
+								<@cCol>
+									<@cLink href="jsp/site/Portal.jsp?page=mydashboard&panel=toutes_mes_demandes#demands" label=''>
+										Voir toutes mes demandes
+									</@cLink>
+								</@cCol>
+							</@cRow>
+						<#else>
+							<@cAlert title='Vous n\'avez fait aucune demande' />
+							<@cLink class='d-block d-sm-none mt-2 ml-2 fs-sm main-info-color' href='jsp/site/Portal.jsp?page=mydashboard&panel=toutes_mes_demandes#demands' label='Voir toutes mes demandes' />
+						</#if>
 					</@cCol>
 				</@cRow>
-			<#else>
-				<@cAlert title='Vous n\'avez fait aucune demande' />
-			</#if>
+			</@cCol>
+		</@cRow>
 	</@cCol>
 </@cRow>
+<@getHtmlPage id='5' idDefault='5' idDiv='pub-mydashboard' />
+<@getHtmlPage id='4' idDefault='4' idDiv='message-pub-rhsso' />

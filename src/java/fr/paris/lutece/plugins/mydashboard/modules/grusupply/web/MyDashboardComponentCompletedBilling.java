@@ -36,6 +36,7 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -55,10 +57,10 @@ import fr.paris.lutece.util.html.HtmlTemplate;
 
 /**
  * 
- * MyDashboardComponentCompletedNotificationGRU
+ * MyDashboardComponentCompletedBilling
  *
  */
-public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardComponent
+public class MyDashboardComponentCompletedBilling extends MyDashboardComponent
 {
 
     /**
@@ -67,12 +69,11 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     private static final long      serialVersionUID                   = 8297192924908575568L;
 
     // CONSTANTS
-    private static final String    TEMPLATE_NOTIFICATION_LIST         = "skin/plugins/mydashboard/modules/grusupply/dashboard_completed_demand.html";
-    private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentCompletedNotif";
-    private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentCompletedNotification.description";
-    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index_cn"; 
-    private static final String    PARAMETER_INDEX_PAGE               = "page_index_cn";
-
+    private static final String    TEMPLATE_NOTIFICATION_LIST         = "skin/plugins/mydashboard/modules/grusupply/dashboard_completed_billing.html";
+    private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentCompletedBilling";
+    private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentCompletedBilling.description";
+    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index_cb";   
+    private static final String    PARAMETER_INDEX_PAGE_BILLING       = "page_index_cb";
 
     @Override
     public String getDashboardData( HttpServletRequest request )
@@ -84,30 +85,36 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
         {
             return StringUtils.EMPTY;
         }
-
-        Map<String, Object> model = new HashMap<>( );
+        
+        Map<String, Object> model = new HashMap<>( );            
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
-            
+        
+        String strDemandTypeIds = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
+                GrusupplyConstants.PROPERTY_TAG_FACTURE, strCategoryCode )
+                .stream( )
+                .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
+                .collect( Collectors.joining(",") );
+        
         DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
                 strCustomerId, 
-                MydashboardGrusupplyUtil.getListStatus( StringUtils.EMPTY,true,false ), 
-                null, 
+                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_FACTURE, true, false ),
+                strDemandTypeIds,
                 null, 
                 null, 
                 EnumNotificationType.MYDASHBOARD.toString( ), 
                 strCategoryCode
         );
-
+   
         MydashboardGrusupplyUtil.getDashboardData(
                 request, 
                 demandResult, 
                 strCustomerId, 
                 strCategoryCode,
                 CURRENT_PAGE_INDEX,
-                PARAMETER_INDEX_PAGE, 
+                PARAMETER_INDEX_PAGE_BILLING, 
                 model 
         );
-  
+
         HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_LIST, request.getLocale( ), model );
         return htmTemplate.getHtml( );
     }

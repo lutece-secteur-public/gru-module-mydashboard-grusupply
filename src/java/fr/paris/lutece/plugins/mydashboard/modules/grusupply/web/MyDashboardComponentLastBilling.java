@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2023, City of Paris
+ * Copyright (c) 2002-2025, City of Paris
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -55,60 +57,53 @@ import fr.paris.lutece.util.html.HtmlTemplate;
 
 /**
  * 
- * MyDashboardComponentCompletedNotificationGRU
+ * MyDasboardComponentLastBilling
  *
  */
-public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardComponent
+public class MyDashboardComponentLastBilling extends MyDashboardComponent
 {
-
     /**
      * 
      */
-    private static final long      serialVersionUID                   = 8297192924908575568L;
+    private static final long serialVersionUID = 6196585897437398381L;
 
-    // CONSTANTS
-    private static final String    TEMPLATE_NOTIFICATION_LIST         = "skin/plugins/mydashboard/modules/grusupply/dashboard_completed_demand.html";
-    private static final String    DASHBOARD_COMPONENT_ID             = "mydashboard-grusupply.componentCompletedNotif";
-    private static final String    MESSAGE_COMPONENT_DESCRIPTION      = "module.mydashboard.grusupply.myDashboardComponentCompletedNotification.description";
-    private static final String    CURRENT_PAGE_INDEX                 = "current_page_index_cn"; 
-    private static final String    PARAMETER_INDEX_PAGE               = "page_index_cn";
-
-
+    private static final String    TEMPLATE_LAST_NOTIFICATION_LIST = "skin/plugins/mydashboard/modules/grusupply/dashboard_last_demand_billing.html";
+    private static final String    DASHBOARD_COMPONENT_ID          = "mydashboard-grusupply.componentLastBilling";
+    private static final String    MESSAGE_COMPONENT_DESCRIPTION   = "module.mydashboard.grusupply.myDashboardComponentLastBilling.description";
+    
     @Override
     public String getDashboardData( HttpServletRequest request )
     {
         final LuteceUser user = SecurityService.getInstance( ).getRegisteredUser( request );
-        final String strCategoryCode = request.getParameter( GrusupplyConstants.PARAMETER_CATEGORY_CODE );
-        
+
         if ( user == null )
         {
             return StringUtils.EMPTY;
         }
-
-        Map<String, Object> model = new HashMap<>( );
+         
+        Map<String, Object> model = new HashMap<>( );           
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
-            
-        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
+        
+        String strDemandTypeIds = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
+                GrusupplyConstants.PROPERTY_TAG_FACTURE, null )
+                .stream( )
+                .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
+                .collect( Collectors.joining(",") );
+        
+        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
                 strCustomerId, 
-                MydashboardGrusupplyUtil.getListStatus( StringUtils.EMPTY,true,false ), 
-                null, 
-                null, 
-                null, 
+                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_FACTURE, true, true ),
+                strDemandTypeIds, 
+                "1", 
+                GrusupplyConstants.PROPERTY_LIMIT_NOTIFICATION_RESULT, 
                 EnumNotificationType.MYDASHBOARD.toString( ), 
-                strCategoryCode
+                null
         );
-
-        MydashboardGrusupplyUtil.getDashboardData(
-                request, 
-                demandResult, 
-                strCustomerId, 
-                strCategoryCode,
-                CURRENT_PAGE_INDEX,
-                PARAMETER_INDEX_PAGE, 
-                model 
-        );
-  
-        HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_NOTIFICATION_LIST, request.getLocale( ), model );
+        
+        model.put( GrusupplyConstants.MARK_LIST_DEMAND, MydashboardGrusupplyUtil.getDemandDashboards(strCustomerId, demandResult));
+        model.put( GrusupplyConstants.MARK_DEMAND_TYPE_LIST, NotificationGruService.getInstance( ).getListDemandType( ) );
+        
+        HtmlTemplate htmTemplate = AppTemplateService.getTemplate( TEMPLATE_LAST_NOTIFICATION_LIST, request.getLocale( ), model );
         return htmTemplate.getHtml( );
     }
 
@@ -122,5 +117,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
     public String getComponentDescription( Locale locale )
     {
         return I18nService.getLocalizedString( MESSAGE_COMPONENT_DESCRIPTION, locale );
+
     }
+
 }

@@ -2,26 +2,25 @@
 <#include "dashboard_notification_util.html"/>
 <@cRow class='mt-l'>
 	<@cCol>
-		<@cTitle level=2>Mes demandes</@cTitle>
+		<@cTitle class="title-appointments" level=2>Mes rendez-vous</@cTitle>
 		<@cRow class='mt-l'>
 			<@cCol>
-				<@filter panelName="toutes_mes_demandes" ancre="demands"/>
+				<@filter class="filter-appointments" panelName="tous_mes_rendez_vous" ancre="appointments"/>
 				<@cTitle level=3 class='main-info-color d-block d-md-flex justify-content-between align-items-center'>
 					<@cInline class='d-flex'>
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" role="img" >
-							<path fill="none" stroke="#354BCF" stroke-width="2" d="M6,16 L16,16 L6,16 L6,16 Z M6,12 L18,12 L6,12 L6,12 Z M6,8 L11,8 L6,8 L6,8 Z M14,1 L14,8 L21,8 M3,23 L3,1 L15,1 L21,7 L21,23 L3,23 Z"/>
+						<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#354BCF">
+							<path d="M202.87-71.87q-37.78 0-64.39-26.61t-26.61-64.39v-554.26q0-37.78 26.61-64.39t64.39-26.61H240v-80h85.5v80h309v-80H720v80h37.13q37.78 0 64.39 26.61t26.61 64.39v554.26q0 37.78-26.61 64.39t-64.39 26.61H202.87Zm0-91h554.26V-560H202.87v397.13Zm0-477.13h554.26v-77.13H202.87V-640Zm0 0v-77.13V-640Z"/>
 						</svg>
-						<@cInline type='span' class='ml-3'>Mes demandes en cours</@cInline>
+						<@cInline type='span' class='ml-3'>Tous mes rendez-vous</@cInline>
 					</@cInline>
-					<@cLink class='d-none d-sm-block ml-2 fs-sm main-info-color' id='toutes_mes_demandes_inprogress' href='jsp/site/Portal.jsp?page=mydashboard&panel=toutes_mes_demandes#demands' label='Voir toutes mes demandes' />
 				</@cTitle>
 				<#if list_demands?? && list_demands?has_content>
 					<@cBlock class='form'>
-						<@tabDemands listDemandDashboard=list_demands class='demand-inp' nameDashboard="inprogressDemand"/>
+						<@tabDemands listDemandDashboard=list_demands class='demand-inp' nameDashboard="allAppointments"/>
 					</@cBlock>
 					<@cPagination paginator=paginator fragment='demands' />
 				<#else>
-					<@cAlert title='Vous n\'avez fait aucune demande.' />
+					<@cAlert title='Vous n\'avez aucun rendez-vous.' />
 				</#if>
 			</@cCol>
 		</@cRow>
@@ -31,8 +30,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         var currentUrl = window.location.href;
-        if (currentUrl.includes("panel=toutes_mes_demandes")) {
-            var linkElement = document.getElementById("toutes_mes_demandes_inprogress");
+        if (currentUrl.includes("panel=tous_mes_rendez_vous")) {
+            var linkElement = document.getElementById("tous_mes_rendez_vous");
             if (linkElement) {
                 linkElement.remove();
             }
@@ -41,6 +40,12 @@
         //Modification de l'ancre du paginator
         var ancre = window.location.hash;
         const paginatorLink = document.querySelectorAll('a.page-link[href]');
+        
+        //Cacher le titre et le filtre
+        if(ancre!='#appointments'){
+        	$('.title-appointments').hide();
+        	$('.filter-appointments').hide();
+        }
 		
         paginatorLink.forEach(link => {
             // Modifier le href

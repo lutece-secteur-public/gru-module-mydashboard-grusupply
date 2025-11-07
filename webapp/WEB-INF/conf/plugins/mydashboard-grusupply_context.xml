@@ -15,5 +15,10 @@
 	<bean id="mydashboard-grusupply.myDashboardLastComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentLastNotificationGRU" />
 	<bean id="mydashboard-grusupply.myDashboardCompletedComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentCompletedNotificationGRU" />
 	<bean id="mydashboard-grusupply.myDashboardInProgressComponentNotificationGRU" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentInProgressNotificationGRU" />	
+	<bean id="mydashboard-grusupply.myDashboardComponentLastBilling" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentLastBilling" />
+	<bean id="mydashboard-grusupply.myDashboardComponentLastAppointments" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentLastAppointments" />
+	<bean id="mydashboard-grusupply.myDashboardCompletedComponentBilling" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentCompletedBilling" />
+	<bean id="mydashboard-grusupply.myDashboardInProgressComponentBilling" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentInProgressBilling" />	
+	<bean id="mydashboard-grusupply.myDashboardComponentAllAppointments" class="fr.paris.lutece.plugins.mydashboard.modules.grusupply.web.MyDashboardComponentAllAppointments" />	
 
 </beans>

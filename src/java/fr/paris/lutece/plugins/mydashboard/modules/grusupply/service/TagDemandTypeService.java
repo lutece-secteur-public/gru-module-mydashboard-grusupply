@@ -33,8 +33,17 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
+import fr.paris.lutece.plugins.grubusiness.business.demand.DemandType;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.TagDemandType;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.TagDemandTypeHome;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
@@ -164,5 +173,35 @@ public class TagDemandTypeService
     public List<TagDemandType> getTagDemandTypesList( )
     {
         return TagDemandTypeHome.getTagDemandTypesList( );
+    }
+    
+    /**
+     * Allows you to retrieve the list of type demands configured with the tag as a parameter
+     * @param strTag
+     * @param strCategory
+     * @return list of demands type
+     */
+    public List<DemandType> getListDemandTypeByTag( String strTag, String strCategory )
+    {       
+        if(strTag == null || strTag.isEmpty( ) )
+        {
+            return Collections.emptyList( );
+        }
+        
+        // Collect the IDs of demand types associated with the given tag
+        Set<Integer> demandTypeIds = getTagDemandTypesList().stream()
+                .filter(tag -> strTag.equals(tag.getTag( )))
+                .map(TagDemandType::getIdDemandType)
+                .collect(Collectors.toSet());
+        
+        //Ajouter un filtre sur la category
+        
+        
+        // Filter and return only the demand types that match those IDs and category
+        return NotificationGruService.getInstance( )
+                .getListDemandType( ).stream( )
+                .filter(demandType -> demandTypeIds.contains(demandType.getIdDemandType()))
+                .filter(demandType -> StringUtils.isEmpty( strCategory ) || strCategory.equals( demandType.getCategory( ) )  )
+                .collect(Collectors.toList());        
     }
 }

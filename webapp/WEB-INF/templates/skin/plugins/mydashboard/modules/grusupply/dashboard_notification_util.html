@@ -1,64 +1,57 @@
 <#-- Get the demand_type from a given id demand type -->
 <#function getDemandType demand_types_list id_demand_type>
-    <#if demand_types_list?? && demand_types_list?has_content>
-        <#list demand_types_list as demand_type>
-            <#if demand_type.idDemandType?string = id_demand_type>
-                <#return demand_type>
-            </#if>
-        </#list>
-    </#if>
+<#if demand_types_list?? && demand_types_list?has_content><#list demand_types_list as demand_type><#if demand_type.idDemandType?string = id_demand_type><#return demand_type></#if></#list></#if>
 </#function>
 <#function getBgColor label >
-	<#assign color = 'F2F6FF'/>
-	<#if label?contains("TERM") || label?contains("ACQUI") >
-		<#assign color = 'F2F6FF'/>
-	<#elseif label?contains("COMPL") || label?contains("RÉGL") || label?contains("REGL") >
-		<#assign color = 'FFFAE6'/>
-	<#elseif label?contains("COUR")>
-		<#assign color = 'F2F6FF'/>
-	<#elseif label?contains("ANNUL")>
-		<#assign color = 'F2F6FF'/>
-	</#if>
-	<#return 'background-color:#'+ color +' !important;'/>
+<#assign color = 'F2F6FF'/>
+<#if label?contains("TERM") || label?contains("ACQUI") >
+<#assign color = 'F2F6FF'/>
+<#elseif label?contains("COMPL") || label?contains("RÉGL") || label?contains("REGL") >
+<#assign color = 'FFFAE6'/>
+<#elseif label?contains("COUR")>
+<#assign color = 'F2F6FF'/>
+<#elseif label?contains("ANNUL")>
+<#assign color = 'F2F6FF'/>
+</#if>
+<#return 'background-color:#'+ color +' !important;'/>
 </#function>
 <#function getColorStatus label >
-	<#assign color = '071F32'/>
-	<#if label?contains("TERM") || label?contains("ACQUI") >
-		<#assign color = '3AE932'/>
-	<#elseif label?contains("COMPL") || label?contains("RÉGL") || label?contains("REGL") >
-		<#assign color = 'E22C3F'/>
-	<#elseif label?contains("COUR")>
-		<#assign color = 'E4AB73'/>
-	<#elseif label?contains("ANNUL")>
-		<#assign color = '828E98'/>
-	</#if>
-	<#return 'color:#'+ color +' !important;'/>
+<#assign color = '071F32'/>
+<#if label?contains("TERM") || label?contains("ACQUI") >
+	<#assign color = '3AE932'/>
+<#elseif label?contains("COMPL") || label?contains("RÉGL") || label?contains("REGL") >
+	<#assign color = 'E22C3F'/>
+<#elseif label?contains("COUR")>
+	<#assign color = 'E4AB73'/>
+<#elseif label?contains("ANNUL")>
+	<#assign color = '828E98'/>
+</#if>
+<#return 'color:#'+ color +' !important;'/>
 </#function>
-  
-<#macro tabDemands listDemandDashboard class>
-<@cTable themed=false caption='Liste des demandes'>
+<#macro tabDemands listDemandDashboard class nameDashboard>
+<@cTable class='demands' caption='Liste des demandes'>
     <@cThead>
-      <@cTr>
-      <@cTh>Demandes</@cTh>
-      <@cTh class='status'>#i18n{crm.crm.columnStatus}</@cTh>
-      <@cTh>Date de mise à jour</@cTh>
-      <@cTh></@cTh>
-    </@cTr>
+    	<@cTr>
+			<@cTh>Demandes</@cTh>
+			<@cTh class='status'>Statut</@cTh>
+			<@cTh>Date de mise à jour</@cTh>
+			<@cTh>Lien</@cTh>
+		</@cTr>
   </@cThead>
   <@cTbody>
   <#list  listDemandDashboard as demandDashboard>
- 	 <#assign demand = demandDashboard.demand>
-    	<#if getDemandType( demand_types_list, demand.typeId )?has_content><#assign demand_type = getDemandType( demand_types_list, demand.typeId)></#if>
-        <#if demand_type??>
-        <@cTr id="${class}-${(demand.UID)!}" class="${class} bg-content" params='data-id="${(demand.UID)!}" data-type-id="${(demand.typeId)!}" style="${getBgColor(demandDashboard.status?upper_case)}"'>
+ 	<#assign demand = demandDashboard.demand>
+    <#if getDemandType( demand_types_list, demand.typeId )?has_content><#assign demand_type = getDemandType( demand_types_list, demand.typeId)></#if>
+    <#if demand_type??>
+        <@cTr id="${class}-${(nameDashboard)!}-${(demand.UID)!}" class="${class} bg-content demand-head" params='data-id="${(nameDashboard)!}-${(demand.UID)!}" data-type-id="${(demand.typeId)!}" style="${getBgColor(demandDashboard.status?upper_case)}"'>
           <@cTd params='data-label="Type : "' nospan=true>
-            <strong>${(demand_type.label)!}</strong>
+            <@cInline type='strong'>${(demand_type.label)!}</@cInline>
 	 		<#if demandDashboard.listNotification??>
 				<#list demandDashboard.listNotification?sort_by('date') as notification>
-					<p class="notif font-weight-normal mt-1">${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - ${(notification.myDashboardNotification.subject)!}
+					<@cText class='notif font-weight-normal mt-1'>${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - ${(notification.myDashboardNotification.subject)!}</@cText>
 				</#list>
 			<#else>
-				<p class="notif font-weight-normal mt-1">Aucune notification !</p>
+			<@cText class='notif font-weight-normal mt-1'>Aucune notification !</@cText>
 			</#if>
           </@cTd>
           <@cTd params='data-label="Statut : " style="${getColorStatus(demandDashboard.status?upper_case)}"' class='status' nospan=true>
@@ -66,40 +59,148 @@
            </@cTd>
           <@cTd class='pe-5' params='data-label="Date :"' nospan=true>
             <@cSection type='div' class='d-flex flex-column justify-content-center'>
-              <strong>${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}</strong>
-              <small>initié le ${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}</small>
+              <@cInline type='strong'>${(demand.modifyDate?number_to_date?string["dd.MM.yyyy"])!}</@cInline>
+              <@cInline type='small'>initié le ${(demand.creationDate?number_to_date?string["dd.MM.yyyy"])!}</@cInline>
             </@cSection>
           </@cTd>
-          <@cTd class='pe-5' params='data-label="Date :"' nospan=true>
-            <#if demand_type.url?has_content><@cLink href='${demand_type.url!}' label='Accéder<br> au service' class='show-target fs-sm url-sn' target='_blank' showTarget=true /></#if>
+          <@cTd class='pe-5' params='data-label="Accéder au service :"' nospan=true>
+            <#if demand_type.url?has_content>
+			<#assign linkLabel>Accéder au service <@cInline class='visually-hidden sr-only'>${(demand_type.label)!}</@cInline></#assign>
+			<@cLink href='${demand_type.url!}' label='Accéder au service' class='show-target fs-sm url-sn' target='_blank' showTarget=true />
+			</#if>
           </@cTd>
 	    </@cTr>
 		<#if demandDashboard.listNotification??>
 			<#list demandDashboard.listNotification?sort_by('date') as notification>
-			<@cTr class="sub msg-${notification.demand.UID!} notification-content" id="content-${(notification.demand.UID)!}" params='style="display:none"'>
+			<@cTr class="sub msg-${(nameDashboard)!}-${notification.demand.UID!} notification-content" id="content-${(nameDashboard)!}-${(notification.demand.UID)!}" params='style="display:none"'>
 				 <@cTd colspan="4" params='style="border-inline: 1px solid gray;"'>
 					<@div class="d-flex align-items-start mb-2" params='style="gap:1.5rem"'>
 						<@div class="media-body text-left">
-							<h3 class="h5 fs-sm main-color">
-								${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - <strong>${(notification.myDashboardNotification.subject)!}</strong>
-							</h3>
-							<p class="py-2 px-4">${(notification.myDashboardNotification.message)!}</p>
+							<@cTitle level=3 class='h5 fs-sm main-color'>${(notification.date?number_to_date?string["dd.MM.yyyy"])!} - <@cInline type='strong'>${(notification.myDashboardNotification.subject)!}</@cInline></@cTitle>
+							<@cBlock class='py-2 px-4'>${(notification.myDashboardNotification.message)!}</@cBlock>
 						</@div>
 					</@div>
 				</@cTd>
 			</@cTr>
 			</#list>
 		</#if>
-      	</#if>
+    </#if>
   </#list>
   </@cTbody>
 </@cTable>
 <script>
-$(document).ready( function( ) {
-	$('body').on('click','.${class}', function(){
-    var idDemand = $(this).data("id");
-    $('.msg-' + idDemand).toggle();
-  });
+document.addEventListener('DOMContentLoaded', function() {
+	document.querySelectorAll('.${class}').forEach(function(element) {
+		element.addEventListener('click', function() {
+			var idDemand = this.getAttribute('data-id');
+			document.querySelectorAll('.msg-' + idDemand).forEach(function(msgElement) {
+				msgElement.style.display = msgElement.style.display === 'none' ? '' : 'none';
+			});
+		});
+	});
+});
+</script>
+</#macro>
+
+<#macro filter class="" panelName="" ancre="">
+<@cFormRow class=class>
+	<@cCol cols='12 col-md-2'>
+	    <@cInput name='date' type='date' id='date'/>
+	</@cCol>
+	<@cCol cols='12 col-md-3'>
+	    <@cSelect id='cat' name='cat'>
+	        <@cOption label="Rubriques (toutes)" value=""/>
+	        <#if categoryList??>
+	            <#list categoryList as key, value>
+	                <@cOption value=key label=value />
+	            </#list>
+	        </#if>
+	    </@cSelect>
+	</@cCol>
+	<@cCol cols='12 col-md-3'>
+	    <@cInput name='search' id='search' placeholder='Rechercher une demande'/>
+	</@cCol>
+	<@cBtn id="searchButton" label="Rechercher" type="button" disabled=true/>
+	<@cBtn id="resetButton" label="Réinitialiser les filtres" type="button" href='jsp/site/Portal.jsp?page=mydashboard&panel=${panelName!}#${ancre!}' params="style='display: none;padding-top: 23px; margin-inline-start: var(--spacing-2);'"/>
+</@cFormRow>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    document.getElementById("date").addEventListener("change", function () {
+        const selectedDate = this.value;
+        const url = new URL(window.location.href);
+
+        if (selectedDate) {
+            url.searchParams.set("date", selectedDate);
+        } else {
+            url.searchParams.delete("date");
+        }
+
+        window.location.href = url;
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const dateParam = urlParams.get("date");
+    if (dateParam) {
+        document.getElementById("date").value = dateParam;
+    }
+
+    const dateInput = document.getElementById("date");
+    const catSelect = document.getElementById("cat");
+    const searchInput = document.getElementById("search");
+    const searchButton = document.getElementById("searchButton");
+    const resetButton = document.getElementById("resetButton");
+
+    searchInput.addEventListener("input", function () {
+        searchButton.disabled = searchInput.value.trim() === "";
+    });
+
+    searchButton.addEventListener("click", function () {
+        const searchValue = searchInput.value.trim();
+        const url = new URL(window.location.href);
+
+        if (searchValue) {
+            url.searchParams.set("search", searchValue);
+        } else {
+            url.searchParams.delete("search");
+        }
+
+        window.location.href = url;
+    });
+
+    const searchParam = urlParams.get("search");
+    if (searchParam) {
+        searchInput.value = searchParam;
+        searchButton.disabled = false;
+    }
+
+    catSelect.addEventListener("change", function () {
+        const selectedCat = this.value;
+        const url = new URL(window.location.href);
+
+        if(selectedCat == ""){
+        	window.location.href = "jsp/site/Portal.jsp?page=mydashboard&panel=${panelName!}#${ancre!}"
+        }
+        else if (selectedCat) {
+            url.searchParams.set("cat", selectedCat);
+        } else {
+            url.searchParams.delete("cat");
+        }
+
+        window.location.href = url;
+    });
+
+    const catParam = urlParams.get("cat");
+    if (catParam) {
+        catSelect.value = catParam;
+    }
+    
+    function checkFilters() {
+        const hasFilters = dateInput.value !== "" || catSelect.value !== "" || searchInput.value.trim() !== "";
+        resetButton.style.display = hasFilters ? "inline-block" : "none";
+    }
+
+    checkFilters();
 });
 </script>
 </#macro>
