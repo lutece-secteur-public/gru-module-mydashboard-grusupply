@@ -297,19 +297,22 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
                     categories = new HashMap<>();
     
                     //Retrieving demand categories
-                    for (DemandDisplay demandDisplay : demandResult.getListDemandDisplay()) {
-                        Demand demand = demandDisplay.getDemand();
-                        if (demand == null || StringUtils.isEmpty(demand.getTypeId())) {
-                            continue;
-                        }
-    
-                        int typeId = Integer.parseInt(demand.getTypeId());
-                        DemandType demandType = demandTypeById.get(typeId);
-                        if (demandType != null) {
-                            String categoryCodeType = demandType.getCategory();
-                            String categoryLabel = categoryCodeToLabel.get(categoryCodeType);
-                            if (categoryLabel != null) {
-                                categories.put(categoryCodeType, categoryLabel);
+                    if(demandResult !=null && demandResult.getListDemandDisplay() != null)
+                    {
+                        for (DemandDisplay demandDisplay : demandResult.getListDemandDisplay()) {
+                            Demand demand = demandDisplay.getDemand();
+                            if (demand == null || StringUtils.isEmpty(demand.getTypeId())) {
+                                continue;
+                            }
+        
+                            int typeId = Integer.parseInt(demand.getTypeId());
+                            DemandType demandType = demandTypeById.get(typeId);
+                            if (demandType != null) {
+                                String categoryCodeType = demandType.getCategory();
+                                String categoryLabel = categoryCodeToLabel.get(categoryCodeType);
+                                if (categoryLabel != null) {
+                                    categories.put(categoryCodeType, categoryLabel);
+                                }
                             }
                         }
                     }
