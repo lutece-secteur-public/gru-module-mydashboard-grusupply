@@ -83,22 +83,25 @@ public class MyDashboardComponentLastAppointments extends MyDashboardComponent
 
         Map<String, Object> model = new HashMap<>( );            
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
+        DemandResult demandResult = null;
         
         String strIdsdemandType = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
                 GrusupplyConstants.PROPERTY_TAG_RDV, null )
                 .stream( )
                 .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
                 .collect( Collectors.joining(","));
-        
-        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
-                strCustomerId,
-                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_RDV, true, true ),
-                strIdsdemandType, 
-                "1", 
-                GrusupplyConstants.PROPERTY_LIMIT_NOTIFICATION_RESULT, 
-                EnumNotificationType.MYDASHBOARD.toString( ), 
-                null
-        );
+       
+        if(StringUtils.isNotEmpty(strIdsdemandType)) {
+	        demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
+	                strCustomerId,
+	                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_RDV, true, true ),
+	                strIdsdemandType, 
+	                "1", 
+	                GrusupplyConstants.PROPERTY_LIMIT_NOTIFICATION_RESULT, 
+	                EnumNotificationType.MYDASHBOARD.toString( ), 
+	                null
+	        );
+        }
                    
         model.put( GrusupplyConstants.MARK_LIST_DEMAND, MydashboardGrusupplyUtil.getDemandDashboards(strCustomerId, demandResult));
         model.put( GrusupplyConstants.MARK_DEMAND_TYPE_LIST, NotificationGruService.getInstance( ).getListDemandType( ) );

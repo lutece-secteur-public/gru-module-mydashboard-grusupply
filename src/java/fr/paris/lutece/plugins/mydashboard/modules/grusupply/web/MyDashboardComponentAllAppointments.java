@@ -89,22 +89,25 @@ public class MyDashboardComponentAllAppointments extends MyDashboardComponent
         
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
         Map<String, Object> model = new HashMap<>( );
+        DemandResult demandResult = null;
 
         String strDemandTypeIds = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
                 GrusupplyConstants.PROPERTY_TAG_RDV, strCategoryCode )
                 .stream( )
                 .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
                 .collect( Collectors.joining(",") );
-                    
-        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
-                strCustomerId, 
-                MydashboardGrusupplyUtil.getListStatus(GrusupplyConstants.PROPERTY_TAG_RDV,true,true ), 
-                strDemandTypeIds, 
-                null, 
-                null, 
-                EnumNotificationType.MYDASHBOARD.toString( ), 
-                strCategoryCode 
-        );
+        
+        if(StringUtils.isNotEmpty(strDemandTypeIds)) {
+	        demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
+	                strCustomerId, 
+	                MydashboardGrusupplyUtil.getListStatus(GrusupplyConstants.PROPERTY_TAG_RDV,true,true ), 
+	                strDemandTypeIds, 
+	                null, 
+	                null, 
+	                EnumNotificationType.MYDASHBOARD.toString( ), 
+	                strCategoryCode 
+	        );
+        }
         
         MydashboardGrusupplyUtil.getDashboardData(
                 request, 

@@ -88,6 +88,7 @@ public class MyDashboardComponentCompletedBilling extends MyDashboardComponent
         
         Map<String, Object> model = new HashMap<>( );            
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
+        DemandResult demandResult = null;
         
         String strDemandTypeIds = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
                 GrusupplyConstants.PROPERTY_TAG_FACTURE, strCategoryCode )
@@ -95,16 +96,18 @@ public class MyDashboardComponentCompletedBilling extends MyDashboardComponent
                 .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
                 .collect( Collectors.joining(",") );
         
-        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
-                strCustomerId, 
-                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_FACTURE, true, false ),
-                strDemandTypeIds,
-                null, 
-                null, 
-                EnumNotificationType.MYDASHBOARD.toString( ), 
-                strCategoryCode
-        );
-   
+        if(StringUtils.isNotEmpty(strDemandTypeIds)) {
+	        demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
+	                strCustomerId, 
+	                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_FACTURE, true, false ),
+	                strDemandTypeIds,
+	                null, 
+	                null, 
+	                EnumNotificationType.MYDASHBOARD.toString( ), 
+	                strCategoryCode
+	        );
+        }
+        
         MydashboardGrusupplyUtil.getDashboardData(
                 request, 
                 demandResult, 
