@@ -72,7 +72,7 @@
 	    </@cTr>
 		<#if demandDashboard.listNotification??>
 			<#list demandDashboard.listNotification?sort_by('date') as notification>
-			<@cTr class="sub msg-${(nameDashboard)!}-${notification.demand.UID!} notification-content" id="content-${(nameDashboard)!}-${(notification.demand.UID)!}" params='style="display:none"'>
+			<@cTr class="sub msg-${(nameDashboard)!}-${demand.UID!} notification-content" id="content-${(nameDashboard)!}-${(demand.UID)!}" params='style="display:none"'>
 				 <@cTd colspan="4" params='style="border-inline: 1px solid gray;"'>
 					<@div class="d-flex align-items-start mb-2" params='style="gap:1.5rem"'>
 						<@div class="media-body text-left">

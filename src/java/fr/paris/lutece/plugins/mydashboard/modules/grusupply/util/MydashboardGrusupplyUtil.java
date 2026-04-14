@@ -160,18 +160,19 @@ public class MydashboardGrusupplyUtil
 
         List<DemandDisplay> displays = demandResult.getListDemandDisplay();
 
-        // Récupération des IDs
-        String strDemandIds = displays.stream()
-                .map(dd -> dd.getDemand().getId())
-                .collect(Collectors.joining(","));
-
-        String strDemandTypeIds = displays.stream()
-                .map(dd -> dd.getDemand().getTypeId())
-                .collect(Collectors.joining(","));
+        // Récupération des IDs      
+        List<Map<String, String>> listDemandPairs = displays.stream()
+        	    .map(d -> {
+        	        Map<String, String> map = new HashMap<>();
+        	        map.put("demandId",d.getDemand().getId());
+        	        map.put("demandTypeId",d.getDemand().getTypeId());
+        	        return map;
+        	    })
+        	    .collect(Collectors.toList());
 
         // Récupération des notifications
         NotificationResult notifications = NotificationGruService.getInstance()
-                .getListNotification(strDemandIds, strDemandTypeIds, strCustomerId, EnumNotificationType.MYDASHBOARD.name());
+                .getListNotification(strCustomerId, listDemandPairs, EnumNotificationType.MYDASHBOARD.name());
 
         // Map notifications par ID de demande
         Map<String, List<Notification>> mapNotifications = (notifications != null)
