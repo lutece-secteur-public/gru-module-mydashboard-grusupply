@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.service;
 
 import java.util.List;
-
+import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -147,17 +147,18 @@ public class NotificationGruService
     
 
     /**
-     * Gets list of notification
-     * @param strIdDemand
-     * @param strIdDemandType
-     * @param strIsRead
+     * Get list of notification
+     * @param strCustomerId
+     * @param listDemandPairs
+     *            list of maps with keys "demandId" and "demandTypeId"
+     * @param strNotificationType
      * @return list of notification
      */
-    public NotificationResult getListNotification( String strIdDemand, String strIdDemandType, String strCustomerId, String strNotificationType)
+    public NotificationResult getListNotification( String strCustomerId, List<Map<String, String>> listDemandPairs, String strNotificationType)
     {        
         try
-        {
-            return _notificationStoreService.getListNotification( strCustomerId, strIdDemand, strIdDemandType, strNotificationType );
+        {   
+            return _notificationStoreService.getNotificationsByDemandList(strCustomerId, listDemandPairs, strNotificationType);
         } catch ( NotificationException e )
         {
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des notifications de l'utilisateur {}", strCustomerId, e.getMessage( ) );
