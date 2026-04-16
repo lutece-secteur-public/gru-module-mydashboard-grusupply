@@ -16,7 +16,7 @@
 				</@cTitle>
 				<#if list_demands?? && list_demands?has_content>
 					<@cBlock class='form'>
-						<@tabDemands listDemandDashboard=list_demands class='demand-inp' nameDashboard="allAppointments"/>
+						<@tabDemands listDemandDashboard=list_demands class='demand-inpAppointments' nameDashboard="allAppointments"/>
 					</@cBlock>
 					<@cPagination paginator=paginator fragment='demands' />
 				<#else>

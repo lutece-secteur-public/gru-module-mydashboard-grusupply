@@ -13,7 +13,7 @@
 		</@cTitle>
 		<#if list_demands?? && list_demands?has_content>
 			<@cBlock class='form'>
-				<@tabDemands listDemandDashboard=list_demands class='demand-comp' nameDashboard="completedDemand"/>
+				<@tabDemands listDemandDashboard=list_demands class='demand-compDemand' nameDashboard="completedDemand"/>
 			</@cBlock>
 			<@cPagination paginator=paginator fragment='demands' />
 		<#else>
