@@ -233,7 +233,9 @@ public class MydashboardGrusupplyUtil
             HttpServletRequest request
         ) {
         
-            String strSessionAttribute = GrusupplyConstants.SESSION_CATEGORIES + strDashboardComponentId;
+            String strSessionAttribute = GrusupplyConstants.SESSION_CATEGORIES + strDashboardComponentId
+            		+ (StringUtils.isNotEmpty(categoryCode) ? categoryCode : StringUtils.EMPTY);
+            
             @SuppressWarnings("unchecked")
             Map<String, String> categories = (Map<String, String>) request.getSession().getAttribute(strSessionAttribute);
 
