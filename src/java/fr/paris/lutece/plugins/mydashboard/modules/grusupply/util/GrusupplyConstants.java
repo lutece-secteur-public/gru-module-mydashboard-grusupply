@@ -62,6 +62,7 @@ public class GrusupplyConstants
     public static final String PROPERTY_TAG_RDV                   = AppPropertiesService.getProperty( "mydashboard-grusupply.tag.rdv", "rdv" );
     public static final String PROPERTY_TAG_FACTURE               = AppPropertiesService.getProperty( "mydashboard-grusupply.tag.facture", "facture" );
     public static final String PROPERTY_LIST_STATUS_BILLING       = "mydashboard-grusupply.list.status.billing";
+    public static final String PROPERTY_LIST_STATUS_APPOINTMENT   = "mydashboard-grusupply.list.status.appointment";
     public static final String PROPERTY_NUMBER_OF_DEMAND_PER_PAGE = "mydashboard-grusupply.limit.result.notification";
     public static final String PROPERTY_URL_MES_DEMARCHES         = "mydashboard-grusupply.url.mesdemarches";
     
