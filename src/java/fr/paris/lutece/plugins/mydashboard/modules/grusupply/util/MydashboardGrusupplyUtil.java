@@ -115,28 +115,30 @@ public class MydashboardGrusupplyUtil
      */
     public static String getListStatus(String tag, boolean includeFinalStatus, boolean includeNonFinalStatus) {
         Stream<EnumGenericStatus> stream;
-
+        String propertyValue = StringUtils.EMPTY;
+        
         if (GrusupplyConstants.PROPERTY_TAG_FACTURE.equalsIgnoreCase(tag)) {
-            String propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_BILLING);
-            if (propertyValue == null || propertyValue.isEmpty()) {
-                return "";
-            }
-
-            stream = Arrays.stream(propertyValue.split(","))
-                .map(String::trim)
-                .map(name -> {
-                    try {
-                        return EnumGenericStatus.valueOf(name);
-                    } catch (IllegalArgumentException e) {
-                        AppLogService.debug("Unknown billing status: " + name);
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull);
-        } else {
-            stream = Arrays.stream(EnumGenericStatus.values());
+            propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_BILLING);       
+        } else if (GrusupplyConstants.PROPERTY_TAG_RDV.equalsIgnoreCase(tag)) {
+            propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_APPOINTMENT);       
+        }
+        
+        if (propertyValue.isEmpty()) {
+                return StringUtils.EMPTY;
         }
 
+        stream = Arrays.stream(propertyValue.split(","))
+            .map(String::trim)
+            .map(name -> {
+                try {
+                    return EnumGenericStatus.valueOf(name);
+                } catch (IllegalArgumentException e) {
+                    AppLogService.debug("Unknown status: " + name);
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull);
+            
         return stream
             .filter(s -> (s.isFinalStatus() && includeFinalStatus) ||
                          (!s.isFinalStatus() && includeNonFinalStatus))
