@@ -193,9 +193,7 @@ public class TagDemandTypeService
                 .filter(tag -> strTag.equals(tag.getTag( )))
                 .map(TagDemandType::getIdDemandType)
                 .collect(Collectors.toSet());
-        
-        //Ajouter un filtre sur la category
-        
+                
         
         // Filter and return only the demand types that match those IDs and category
         return NotificationGruService.getInstance( )
@@ -203,5 +201,24 @@ public class TagDemandTypeService
                 .filter(demandType -> demandTypeIds.contains(demandType.getIdDemandType()))
                 .filter(demandType -> StringUtils.isEmpty( strCategory ) || strCategory.equals( demandType.getCategory( ) )  )
                 .collect(Collectors.toList());        
+    }
+    
+    /**
+     * Retrieve the list of untagged demand types
+     * @param strCategory
+     * @return list of demand types
+     */
+    public List<DemandType> getUntaggedDemandTypesList(String strCategory){     	
+        // Collect the IDs of tagged demand types
+        Set<Integer> taggedDemandTypeIds = getTagDemandTypesList().stream()
+                .map(TagDemandType::getIdDemandType)
+                .collect(Collectors.toSet());
+    	
+        // Filter and return only the untagged demand types
+        return NotificationGruService.getInstance( )
+                .getListDemandType( ).stream( )
+                .filter(demandType -> !taggedDemandTypeIds.contains(demandType.getIdDemandType()))
+                .filter(demandType -> StringUtils.isEmpty( strCategory ) || strCategory.equals( demandType.getCategory( ) )  )
+                .collect(Collectors.toList());   
     }
 }
