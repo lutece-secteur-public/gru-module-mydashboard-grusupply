@@ -36,6 +36,7 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
+import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -87,11 +89,18 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
 
         Map<String, Object> model = new HashMap<>( );
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
-            
+         
+        //IDs of untagged demand types
+        String strUntaggedDemandTypeIds = TagDemandTypeService.getInstance( )
+        		.getUntaggedDemandTypesList(strCategoryCode)
+                .stream( )
+                .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
+                .collect( Collectors.joining(",") );
+        
         DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
                 strCustomerId, 
                 MydashboardGrusupplyUtil.getListStatus( StringUtils.EMPTY,true,false ), 
-                null, 
+                strUntaggedDemandTypeIds, 
                 null, 
                 null, 
                 EnumNotificationType.MYDASHBOARD.toString( ), 

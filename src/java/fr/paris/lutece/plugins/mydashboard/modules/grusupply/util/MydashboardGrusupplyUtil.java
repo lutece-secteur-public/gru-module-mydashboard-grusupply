@@ -38,9 +38,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,18 +117,20 @@ public class MydashboardGrusupplyUtil
      */
     public static String getListStatus(String tag, boolean includeFinalStatus, boolean includeNonFinalStatus) {
         Stream<EnumGenericStatus> stream;
-        String propertyValue = StringUtils.EMPTY;
+        String propertyValue;
         
         if (GrusupplyConstants.PROPERTY_TAG_FACTURE.equalsIgnoreCase(tag)) {
             propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_BILLING);       
         } else if (GrusupplyConstants.PROPERTY_TAG_RDV.equalsIgnoreCase(tag)) {
-            propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_APPOINTMENT);       
+        	propertyValue = getFilteredStatusList(false,true);
+        } else {
+        	propertyValue = getFilteredStatusList(false,false);
         }
         
         if (propertyValue.isEmpty()) {
                 return StringUtils.EMPTY;
         }
-
+        
         stream = Arrays.stream(propertyValue.split(","))
             .map(String::trim)
             .map(name -> {
@@ -144,6 +148,46 @@ public class MydashboardGrusupplyUtil
                          (!s.isFinalStatus() && includeNonFinalStatus))
             .map(s -> String.valueOf(s.getStatusId()))
             .collect(Collectors.joining(","));
+    }
+    
+    /**
+     * This method returns a list of statuses with or without billing statuses and appointment statuses.
+     * @param bIncludeBillingStatus
+     * @param bIncludeAppointmentStatus
+     * @return list of statuses separated by comma
+     */
+    public static String getFilteredStatusList(boolean bIncludeBillingStatus, boolean bIncludeAppointmentStatus) {        
+        Set<String> excludedStatuses = new HashSet<>();
+
+        // Statuts Billing à exclure
+        if (!bIncludeBillingStatus) {
+            String statusBilling = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_BILLING);
+
+            if (statusBilling != null) {
+                excludedStatuses.addAll(
+                    Arrays.stream(statusBilling.split(","))
+                          .map(String::trim)
+                          .collect(Collectors.toSet()));
+            }
+        }
+        
+        // Status Appointment à exclure
+        if (!bIncludeAppointmentStatus) {
+            String statusAppointment = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_APPOINTMENT);
+
+            if (statusAppointment != null) {
+                excludedStatuses.addAll(
+                    Arrays.stream(statusAppointment.split(","))
+                          .map(String::trim)
+                          .collect(Collectors.toSet()));
+            }
+        }
+
+        // Liste des statuts
+        return Arrays.stream(EnumGenericStatus.values())
+                .map(EnumGenericStatus::name)
+                .filter(statusName -> !excludedStatuses.contains(statusName))
+                .collect(Collectors.joining(","));
     }
 
     /**
