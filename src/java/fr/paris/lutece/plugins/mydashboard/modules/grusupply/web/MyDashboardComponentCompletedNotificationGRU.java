@@ -104,7 +104,7 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
                 null, 
                 null, 
                 EnumNotificationType.MYDASHBOARD.toString( ), 
-                strCategoryCode
+                null
         );
 
         MydashboardGrusupplyUtil.getDashboardData(

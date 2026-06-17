@@ -324,6 +324,12 @@ public class MydashboardGrusupplyUtil
                             }
                         }
                     }
+                    
+                    //Add the categoryCode parameter to the categories when no category is found.
+                    if (StringUtils.isNotEmpty(categoryCode) && categories.isEmpty()) {
+                        categories.put(categoryCode, categoryCodeToLabel.get(categoryCode));
+                    }
+                    
                 } catch (NumberFormatException e) {
                     AppLogService.error( "Une erreur s'est produite lors de la récupération des categories des demandes", e.getMessage( ));
                 }

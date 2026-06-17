@@ -104,7 +104,7 @@ public class MyDashboardComponentCompletedBilling extends MyDashboardComponent
 	                null, 
 	                null, 
 	                EnumNotificationType.MYDASHBOARD.toString( ), 
-	                strCategoryCode
+	                null
 	        );
         }
         

@@ -103,7 +103,7 @@ public class MyDashboardComponentInProgressBilling extends MyDashboardComponent
 	                null, 
 	                null, 
 	                EnumNotificationType.MYDASHBOARD.toString( ), 
-	                strCategoryCode
+	                null
 	        );
         }
         
