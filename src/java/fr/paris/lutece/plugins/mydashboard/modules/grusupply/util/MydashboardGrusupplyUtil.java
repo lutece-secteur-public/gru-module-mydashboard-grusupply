@@ -109,7 +109,11 @@ public class MydashboardGrusupplyUtil
     }
     
     /**
-     * Get list status
+     * Get list status.
+     * <p>
+     * An empty billing status list (mydashboard-grusupply.list.status.billing) displays all the generic statuses in the billing dashboards,
+     * and an empty status list never excludes any status from the other dashboards.
+     *
      * @param tag
      * @param includeFinalStatus
      * @param includeNonFinalStatus
@@ -120,7 +124,10 @@ public class MydashboardGrusupplyUtil
         String propertyValue;
         
         if (GrusupplyConstants.PROPERTY_TAG_FACTURE.equalsIgnoreCase(tag)) {
-            propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_BILLING);       
+            propertyValue = AppPropertiesService.getProperty(GrusupplyConstants.PROPERTY_LIST_STATUS_BILLING, StringUtils.EMPTY);
+            if (StringUtils.isBlank(propertyValue)) {
+                propertyValue = getFilteredStatusList(true,true);
+            }
         } else if (GrusupplyConstants.PROPERTY_TAG_RDV.equalsIgnoreCase(tag)) {
         	propertyValue = getFilteredStatusList(false,true);
         } else {
