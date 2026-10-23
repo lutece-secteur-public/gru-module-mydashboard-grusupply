@@ -264,7 +264,7 @@ public class MydashboardGrusupplyUtil
      * @param strDashboardComponentId
      * @param strCustomerId
      * @param categoryCode
-     * @param strDemandTypeIds
+     * @param strTag metadata tag used to filter the demands (null to not filter)
      * @param strListStatus
      * @param request
      * @return the list of categories of user demands
@@ -273,7 +273,7 @@ public class MydashboardGrusupplyUtil
             String strDashboardComponentId,
             String strCustomerId,
             String categoryCode,
-            String strDemandTypeIds,
+            String strTag,
             String strListStatus,
             Map<String,Object> model,
             HttpServletRequest request
@@ -289,8 +289,14 @@ public class MydashboardGrusupplyUtil
                 try {
                     //Demand list
                     DemandResult demandResult = NotificationGruService.getInstance()
-                            .getListDemandByStatus(strCustomerId, strListStatus, strDemandTypeIds, null,
+                            .getListDemandByStatus(strCustomerId, strListStatus, null, null,
                                     "20000", EnumNotificationType.MYDASHBOARD.toString(), categoryCode);
+                    
+                    //Filter demands by metadata tag
+                    if (StringUtils.isNotEmpty(strTag)) {
+                        demandResult = NotificationGruService.getInstance()
+                                .filterDemandResultByMetadataTag(demandResult, strTag, StringUtils.EMPTY);
+                    }
                     
                     List<DemandType> listDemandTypes = NotificationGruService.getInstance( ).getListDemandType( );    
                     List<DemandCategory> allCategories = NotificationGruService.getInstance().getListDemandCategories();
@@ -300,7 +306,7 @@ public class MydashboardGrusupplyUtil
                             .collect(Collectors.toMap(DemandCategory::getCode, DemandCategory::getLabel));
     
                     //Map of demandType
-                    Map<Integer, DemandType> demandTypeById = listDemandTypes.stream()
+                    Map<String, DemandType> demandTypeById = listDemandTypes.stream()
                             .collect(Collectors.toMap(DemandType::getIdDemandType, Function.identity()));
     
                     categories = new HashMap<>();
@@ -313,8 +319,7 @@ public class MydashboardGrusupplyUtil
                                 continue;
                             }
         
-                            int typeId = Integer.parseInt(demand.getTypeId());
-                            DemandType demandType = demandTypeById.get(typeId);
+                            DemandType demandType = demandTypeById.get(demand.getTypeId());
                             if (demandType != null) {
                                 String categoryCodeType = demandType.getCategory();
                                 String categoryLabel = categoryCodeToLabel.get(categoryCodeType);

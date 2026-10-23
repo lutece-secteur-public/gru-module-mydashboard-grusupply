@@ -33,6 +33,10 @@
  */
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.util;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import fr.paris.lutece.portal.service.util.AppPropertiesService;
 
 /**
@@ -65,6 +69,11 @@ public class GrusupplyConstants
     public static final String PROPERTY_LIST_STATUS_APPOINTMENT   = "mydashboard-grusupply.list.status.appointment";
     public static final String PROPERTY_NUMBER_OF_DEMAND_PER_PAGE = "mydashboard-grusupply.limit.result.notification";
     public static final String PROPERTY_URL_MES_DEMARCHES         = "mydashboard-grusupply.url.mesdemarches";
+
+    /**
+     * List of the metadata tags used to select demands
+     */
+    public static final List<String> METADATA_TAGS                 = Collections.unmodifiableList( Arrays.asList( PROPERTY_TAG_RDV, PROPERTY_TAG_FACTURE ) );
     
     // PARAMETERS
     public static final String PARAMETER_CATEGORY_CODE            = "cat";

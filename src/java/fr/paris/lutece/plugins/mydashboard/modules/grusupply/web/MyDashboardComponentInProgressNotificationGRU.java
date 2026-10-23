@@ -36,7 +36,6 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -90,22 +88,19 @@ public class MyDashboardComponentInProgressNotificationGRU extends MyDashboardCo
         Map<String, Object> model = new HashMap<>( );
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
         
-        //IDs of untagged demand types
-        String strUntaggedDemandTypeIds = TagDemandTypeService.getInstance( )
-        		.getUntaggedDemandTypesList(strCategoryCode)
-                .stream( )
-                .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
-                .collect( Collectors.joining(",") );
-        
         DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
                 strCustomerId, 
                 MydashboardGrusupplyUtil.getListStatus( StringUtils.EMPTY,false,true ), 
-                strUntaggedDemandTypeIds, 
+                null, 
                 null, 
                 null, 
                 EnumNotificationType.MYDASHBOARD.toString( ), 
                 null 
         );
+        
+        //Filter demands not selected by any metadata tag
+        demandResult = NotificationGruService.getInstance( )
+                .filterDemandResultByMetadataUntagged( demandResult, GrusupplyConstants.METADATA_TAGS, strCategoryCode );
         
         MydashboardGrusupplyUtil.getDashboardData(
                 request, 

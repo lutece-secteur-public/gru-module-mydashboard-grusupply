@@ -36,7 +36,6 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -83,26 +81,21 @@ public class MyDashboardComponentLastAppointments extends MyDashboardComponent
 
         Map<String, Object> model = new HashMap<>( );            
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
-        DemandResult demandResult = null;
         
-        String strIdsdemandType = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
-                GrusupplyConstants.PROPERTY_TAG_RDV, null )
-                .stream( )
-                .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
-                .collect( Collectors.joining(","));
-       
-        if(StringUtils.isNotEmpty(strIdsdemandType)) {
-	        demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
-	                strCustomerId,
-	                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_RDV, true, true ),
-	                strIdsdemandType, 
-	                "1", 
-	                GrusupplyConstants.PROPERTY_LIMIT_NOTIFICATION_RESULT, 
-	                EnumNotificationType.MYDASHBOARD.toString( ), 
-	                null
-	        );
-        }
-                   
+        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus(
+                strCustomerId,
+                MydashboardGrusupplyUtil.getListStatus( GrusupplyConstants.PROPERTY_TAG_RDV, true, true ),
+                null, 
+                "1", 
+                GrusupplyConstants.PROPERTY_LIMIT_NOTIFICATION_RESULT, 
+                EnumNotificationType.MYDASHBOARD.toString( ), 
+                null
+        );
+        
+        //Filter demands by metadata tag
+        demandResult = NotificationGruService.getInstance( )
+                .filterDemandResultByMetadataTag( demandResult, GrusupplyConstants.PROPERTY_TAG_RDV, StringUtils.EMPTY );
+                    
         model.put( GrusupplyConstants.MARK_LIST_DEMAND, MydashboardGrusupplyUtil.getDemandDashboards(strCustomerId, demandResult));
         model.put( GrusupplyConstants.MARK_DEMAND_TYPE_LIST, NotificationGruService.getInstance( ).getListDemandType( ) );
 

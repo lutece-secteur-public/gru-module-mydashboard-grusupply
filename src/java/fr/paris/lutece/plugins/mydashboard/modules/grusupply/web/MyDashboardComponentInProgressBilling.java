@@ -36,7 +36,6 @@ package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,7 +44,6 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -88,24 +86,20 @@ public class MyDashboardComponentInProgressBilling extends MyDashboardComponent
         
         Map<String, Object> model = new HashMap<>( );
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
-        DemandResult demandResult = null;
         
-        String strDemandTypeIds = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
-                GrusupplyConstants.PROPERTY_TAG_FACTURE, strCategoryCode ).stream( )
-                .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
-                .collect( Collectors.joining(",") );
+        DemandResult demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
+                strCustomerId, 
+                MydashboardGrusupplyUtil.getListStatus(GrusupplyConstants.PROPERTY_TAG_FACTURE,false,true ), 
+                null, 
+                null, 
+                null, 
+                EnumNotificationType.MYDASHBOARD.toString( ), 
+                null
+        );
         
-        if(StringUtils.isNotEmpty(strDemandTypeIds)) {
-	        demandResult = NotificationGruService.getInstance( ).getListDemandByStatus( 
-	                strCustomerId, 
-	                MydashboardGrusupplyUtil.getListStatus(GrusupplyConstants.PROPERTY_TAG_FACTURE,false,true ), 
-	                strDemandTypeIds, 
-	                null, 
-	                null, 
-	                EnumNotificationType.MYDASHBOARD.toString( ), 
-	                null
-	        );
-        }
+        //Filter demands by metadata tag
+        demandResult = NotificationGruService.getInstance( )
+                .filterDemandResultByMetadataTag( demandResult, GrusupplyConstants.PROPERTY_TAG_FACTURE, strCategoryCode );
         
         MydashboardGrusupplyUtil.getDashboardData(
                 request, 
@@ -121,7 +115,7 @@ public class MyDashboardComponentInProgressBilling extends MyDashboardComponent
                 DASHBOARD_COMPONENT_ID,
                 strCustomerId, 
                 strCategoryCode,
-                strDemandTypeIds,
+                GrusupplyConstants.PROPERTY_TAG_FACTURE,
                 MydashboardGrusupplyUtil.getListStatus(GrusupplyConstants.PROPERTY_TAG_FACTURE,true,true ), 
                 model, 
                 request
