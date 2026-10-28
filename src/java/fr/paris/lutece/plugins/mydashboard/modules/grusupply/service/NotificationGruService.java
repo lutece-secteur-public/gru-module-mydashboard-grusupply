@@ -49,12 +49,14 @@ import fr.paris.lutece.plugins.mydashboard.modules.grusupply.business.DemandDash
 import fr.paris.lutece.plugins.notificationstore.v1.web.service.NotificationStoreService;
 import fr.paris.lutece.portal.service.spring.SpringContextService;
 import fr.paris.lutece.portal.service.util.AppLogService;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 /**
  * 
@@ -182,6 +184,42 @@ public class NotificationGruService
             AppLogService.error( "Une erreur s'est produite lors de la récupération de la liste des types de demande", e.getMessage( ) );  
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Get list of demand types matching the given category, and also containing an entry in its metadata as such :
+     * - the given tag for key
+     * - "true" for value
+     *
+     * @param tag - the tag. if tag is blank, the result will be an empty list.
+     * @param category - the category. if category is blank, no filter will be applied on the category.
+     * @return list of filtered demand type
+     */
+    public List<DemandType> getListDemandTypeByTagAndCategory( final String tag, final String category )
+    {
+        if ( StringUtils.isBlank( tag ) )
+        {
+            return List.of( );
+        }
+        return getListDemandType( ).stream( ).filter( dt -> dt.getMetaData( ) != null )
+                                             .filter( dt -> "true".equalsIgnoreCase( dt.getMetaData( ).get( tag ) ) )
+                                             .filter( dt -> StringUtils.isBlank( category ) || category.equalsIgnoreCase( dt.getCategory( ) ) )
+                                             .collect(Collectors.toList());
+    }
+    
+    /**
+     * Get list of demand types matching the given category, and also NOT containing an entry in its metadata as such :
+     * - key contained in the given tags list
+     * - "true" for value
+     * @param tags - the tags that should NOT be present in the metadata.
+     * @param category - the category. if category is blank, no filter will be applied on the category.
+     * @return list of filtered demand types
+    */
+    public List<DemandType> getListUntaggedDemandTypeByCategory( final List<String> tags, final String category )
+    {
+        return getListDemandType( ).stream( ).filter(dt -> dt.getMetaData() == null || dt.getMetaData().entrySet().stream().allMatch(e -> !tags.contains(e.getKey()) || !"true".equalsIgnoreCase(e.getValue())))
+                                             .filter(dt -> StringUtils.isBlank( category ) || category.equalsIgnoreCase( dt.getCategory( ) ) )
+                                             .collect(Collectors.toList());
     }
     
     /**

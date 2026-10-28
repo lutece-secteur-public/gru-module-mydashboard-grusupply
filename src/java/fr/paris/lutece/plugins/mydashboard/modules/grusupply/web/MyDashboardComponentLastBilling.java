@@ -45,7 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
+
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -85,7 +85,7 @@ public class MyDashboardComponentLastBilling extends MyDashboardComponent
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
         DemandResult demandResult = null;
         
-        String strDemandTypeIds = TagDemandTypeService.getInstance( ).getListDemandTypeByTag( 
+        String strDemandTypeIds = NotificationGruService.getInstance( ).getListDemandTypeByTagAndCategory(
                 GrusupplyConstants.PROPERTY_TAG_FACTURE, null )
                 .stream( )
                 .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )

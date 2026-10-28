@@ -307,7 +307,7 @@ public class MydashboardGrusupplyUtil
                             .collect(Collectors.toMap(DemandCategory::getCode, DemandCategory::getLabel));
     
                     //Map of demandType
-                    Map<Integer, DemandType> demandTypeById = listDemandTypes.stream()
+                    Map<String, DemandType> demandTypeById = listDemandTypes.stream()
                             .collect(Collectors.toMap(DemandType::getIdDemandType, Function.identity()));
     
                     categories = new HashMap<>();
@@ -320,7 +320,7 @@ public class MydashboardGrusupplyUtil
                                 continue;
                             }
         
-                            int typeId = Integer.parseInt(demand.getTypeId());
+                            String typeId = demand.getTypeId();
                             DemandType demandType = demandTypeById.get(typeId);
                             if (demandType != null) {
                                 String categoryCodeType = demandType.getCategory();
