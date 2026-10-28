@@ -34,6 +34,7 @@
 package fr.paris.lutece.plugins.mydashboard.modules.grusupply.web;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ import org.apache.commons.lang3.StringUtils;
 import fr.paris.lutece.plugins.grubusiness.business.notification.EnumNotificationType;
 import fr.paris.lutece.plugins.grubusiness.business.web.rs.DemandResult;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.NotificationGruService;
-import fr.paris.lutece.plugins.mydashboard.modules.grusupply.service.TagDemandTypeService;
+
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.GrusupplyConstants;
 import fr.paris.lutece.plugins.mydashboard.modules.grusupply.util.MydashboardGrusupplyUtil;
 import fr.paris.lutece.plugins.mydashboard.service.MyDashboardComponent;
@@ -91,8 +92,8 @@ public class MyDashboardComponentCompletedNotificationGRU extends MyDashboardCom
         final String strCustomerId = MydashboardGrusupplyUtil.getCustomerId(user.getName(),request);
          
         //IDs of untagged demand types
-        String strUntaggedDemandTypeIds = TagDemandTypeService.getInstance( )
-        		.getUntaggedDemandTypesList(strCategoryCode)
+        String strUntaggedDemandTypeIds = NotificationGruService.getInstance( ).getListUntaggedDemandTypeByCategory(
+                List.of( GrusupplyConstants.PROPERTY_TAG_RDV, GrusupplyConstants.PROPERTY_TAG_FACTURE ), strCategoryCode )
                 .stream( )
                 .map( demandType -> String.valueOf( demandType.getIdDemandType( ) ) )
                 .collect( Collectors.joining(",") );
